@@ -90,7 +90,7 @@ export default function Auth() {
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${role === "practitioner" ? "bg-white text-black shadow-sm" : "text-gray-500"}`}
                   >
                     <ShieldCheck size={16} />
-                    Practitioner
+                    Tutor / Expert
                   </button>
                 </div>
               )}
