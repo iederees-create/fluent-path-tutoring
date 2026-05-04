@@ -58,6 +58,7 @@ function LandingPage() {
           Conversational English for <br />
           <span className="text-black">Real Life Confidence</span>
         </h1>
+        <p className="text-xs text-gray-300 mb-4 opacity-50">v1.0.3-deployed</p>
         
         <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
           The first credentialed ecosystem connecting expert tutors with ambitious global learners. Master conversation, exams, and professional English.
