@@ -28,9 +28,12 @@ export default function Auth() {
     setLoading(true);
     setMessage("");
 
+    // Dynamically construct the redirect URL for GitHub Pages + HashRouter
+    const redirectUrl = window.location.origin + window.location.pathname + "#/auth/callback";
+
     if (isForgotPassword) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+        redirectTo: `${redirectUrl}?type=recovery`,
       });
       if (error) setMessage(error.message);
       else setMessage("Password reset link sent to your email!");
@@ -42,7 +45,7 @@ export default function Auth() {
           data: {
             role: role,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
         },
       });
       if (error) setMessage(error.message);
