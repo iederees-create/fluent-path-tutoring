@@ -8,7 +8,13 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      const params = new URLSearchParams(window.location.search)
       
+      if (params.get('type') === 'recovery') {
+        navigate('/update-password')
+        return
+      }
+
       if (user) {
         const role = user.user_metadata?.role
         // Differentiate between practitioner and looking for services (learner)

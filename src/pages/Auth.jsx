@@ -10,6 +10,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(new URLSearchParams(location.search).get("signup") === "true");
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +28,13 @@ export default function Auth() {
     setLoading(true);
     setMessage("");
 
-    if (isSignUp) {
+    if (isForgotPassword) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      });
+      if (error) setMessage(error.message);
+      else setMessage("Password reset link sent to your email!");
+    } else if (isSignUp) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -64,17 +71,17 @@ export default function Auth() {
               <User size={32} />
             </div>
             <CardTitle className="text-3xl font-display font-extrabold tracking-tight">
-              {isSignUp ? "Create Account" : "Welcome Back"}
+              {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Welcome Back"}
             </CardTitle>
             <CardDescription className="text-gray-500 mt-2">
-              {isSignUp ? "Join the FluentPath ecosystem today." : "Sign in to manage your sessions."}
+              {isForgotPassword ? "Enter your email to receive a reset link." : isSignUp ? "Join the FluentPath ecosystem today." : "Sign in to manage your sessions."}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="p-10 pt-4">
             <form onSubmit={handleAuth} className="space-y-6">
               
-              {isSignUp && (
+              {isSignUp && !isForgotPassword && (
                 <div className="bg-gray-100 p-1.5 rounded-2xl flex gap-1 border border-gray-200 mb-6">
                   <button
                     type="button"
@@ -107,40 +114,60 @@ export default function Auth() {
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all"
                   />
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all"
-                  />
-                </div>
+                {!isForgotPassword && (
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all"
+                    />
+                  </div>
+                )}
               </div>
+
+              {!isSignUp && !isForgotPassword && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-xs font-bold text-gray-400 hover:text-black transition-colors"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              )}
 
               <Button 
                 disabled={loading}
                 className="w-full h-16 rounded-2xl bg-black hover:bg-gray-800 text-lg font-bold group"
               >
-                {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? "Create Account" : "Sign In")}
+                {loading ? <Loader2 className="animate-spin" /> : (isForgotPassword ? "Send Reset Link" : isSignUp ? "Create Account" : "Sign In")}
                 {!loading && <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />}
               </Button>
 
               {message && (
-                <p className={`text-center text-sm font-medium ${message.includes("confirmation") ? "text-emerald-600" : "text-rose-600"}`}>
+                <p className={`text-center text-sm font-medium ${message.includes("sent") || message.includes("confirmation") ? "text-emerald-600" : "text-rose-600"}`}>
                   {message}
                 </p>
               )}
 
-              <div className="text-center pt-4">
+              <div className="text-center pt-4 space-y-2">
                 <button
                   type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-sm font-bold text-gray-500 hover:text-black transition-colors"
+                  onClick={() => {
+                    if (isForgotPassword) {
+                      setIsForgotPassword(false);
+                    } else {
+                      setIsSignUp(!isSignUp);
+                    }
+                  }}
+                  className="text-sm font-bold text-gray-500 hover:text-black transition-colors block w-full"
                 >
-                  {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
+                  {isForgotPassword ? "Back to Sign In" : isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
                 </button>
               </div>
             </form>

@@ -25,6 +25,7 @@ import AuthCallback from "./pages/AuthCallback";
 import SafetyPolicy from "./pages/SafetyPolicy";
 import ClassInGuide from "./pages/ClassInGuide";
 import VideoRoom from "./pages/VideoRoom";
+import UpdatePassword from "./pages/UpdatePassword";
 import { supabase } from "./lib/supabase";
 
 // --- Landing Page Component ---
@@ -235,6 +236,7 @@ export default function App() {
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/safety" element={<SafetyPolicy />} />
             <Route path="/guide" element={<ClassInGuide />} />
             <Route path="/session/:id" element={<VideoRoom />} />
