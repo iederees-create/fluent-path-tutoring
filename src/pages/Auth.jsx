@@ -59,7 +59,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6 pt-32">
+    <div className="min-h-screen bg-mesh flex items-center justify-center p-6 pt-32">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
