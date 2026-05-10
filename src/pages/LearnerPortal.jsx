@@ -100,6 +100,27 @@ export default function LearnerPortal() {
           
           {/* Sidebar: Activity/Progress */}
           <div className="space-y-8">
+            <Card className="border-none shadow-sm rounded-3xl bg-white">
+              <CardHeader className="p-6">
+                <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <BookOpen className="text-gray-400" /> Subscription
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="bg-gray-50 p-4 rounded-2xl mb-4 text-center">
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Current Plan</p>
+                  <p className="font-bold text-gray-900 text-lg">Pay As You Go</p>
+                </div>
+                <Button 
+                  onClick={() => alert("Future: Routes to Stripe Customer Portal")}
+                  variant="outline" 
+                  className="w-full rounded-xl h-12 font-bold border-gray-100 group"
+                >
+                  Manage Billing (Stripe) <ArrowUpRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card className="border-none shadow-sm rounded-3xl bg-white p-2">
               <CardHeader className="p-6">
                 <CardTitle className="text-xl font-bold">Learning Activity</CardTitle>

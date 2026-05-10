@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import SafetyPolicy from "./pages/SafetyPolicy";
 import ClassInGuide from "./pages/ClassInGuide";
+import VideoRoom from "./pages/VideoRoom";
 import { supabase } from "./lib/supabase";
 
 // --- Landing Page Component ---
@@ -236,6 +237,7 @@ export default function App() {
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/safety" element={<SafetyPolicy />} />
             <Route path="/guide" element={<ClassInGuide />} />
+            <Route path="/session/:id" element={<VideoRoom />} />
           </Routes>
         </AnimatePresence>
 

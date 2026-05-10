@@ -2,6 +2,8 @@ import React from "react";
 import { Button } from "./ui/button";
 import { Clock, Video } from "lucide-react";
 
+import { Link } from "react-router-dom";
+
 export default function SessionCard({ name, topic, time, role, imageUrl }) {
   return (
     <div className="flex items-center justify-between p-5 rounded-2xl bg-white border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all group">
@@ -27,10 +29,12 @@ export default function SessionCard({ name, topic, time, role, imageUrl }) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" className="rounded-xl border-gray-100 h-10 px-4 font-bold text-xs hover:bg-black hover:text-white transition-all group-hover:border-black">
-          <Video size={14} className="mr-2" />
-          Enter Room
-        </Button>
+        <Link to="/session/PRJ-123">
+          <Button variant="outline" size="sm" className="rounded-xl border-gray-100 h-10 px-4 font-bold text-xs hover:bg-black hover:text-white transition-all group-hover:border-black">
+            <Video size={14} className="mr-2" />
+            Enter Room
+          </Button>
+        </Link>
       </div>
     </div>
   );

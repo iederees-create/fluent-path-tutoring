@@ -38,8 +38,65 @@ export default function BookingPage() {
     }
   ];
 
+  const [bookingTutor, setBookingTutor] = React.useState(null);
+
+  const BookingModal = ({ tutor, onClose }) => {
+    if (!tutor) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[80vh] md:h-[600px]"
+        >
+          {/* Left Side: Info */}
+          <div className="md:w-1/3 bg-gray-50 p-8 border-r border-gray-100 flex flex-col">
+            <button onClick={onClose} className="absolute top-4 left-4 md:hidden text-gray-500">Close</button>
+            <div className="flex-1">
+              <img src={tutor.imageUrl} alt={tutor.name} className="w-16 h-16 rounded-2xl mb-4 shadow-sm" />
+              <h2 className="text-xl font-bold mb-1">{tutor.name}</h2>
+              <p className="text-sm font-medium text-blue-600 mb-6">{tutor.role}</p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+                  <Clock size={16} /> 60 Minute Session
+                </div>
+                <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+                  <Globe size={16} /> WebRTC Video
+                </div>
+                <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+                  <Star size={16} className="text-orange-400" /> {tutor.price} / session
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Side: Cal.com Placeholder */}
+          <div className="md:w-2/3 p-8 flex flex-col items-center justify-center text-center">
+            <div className="w-full max-w-sm">
+              <Calendar size={48} className="mx-auto text-blue-100 mb-6" />
+              <h3 className="text-2xl font-bold mb-2">Select a Time</h3>
+              <p className="text-gray-500 mb-8 text-sm">
+                (This area will be powered by the official <b>@calcom/embed-react</b> package once API keys are registered. It handles timezones and Stripe payments natively.)
+              </p>
+              
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                {['09:00', '10:00', '11:00', '13:00', '14:00', '16:00'].map(time => (
+                  <button key={time} onClick={() => alert('Future: Routes to Stripe Checkout via Cal.com')} className="py-3 border border-gray-200 rounded-xl font-bold text-sm hover:border-blue-500 hover:text-blue-600 transition-colors">
+                    {time}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Timezone: Africa/Johannesburg (GMT+2)</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-6">
+    <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-6 relative">
       <div className="max-w-7xl mx-auto">
         
         <div className="mb-12">
@@ -126,7 +183,10 @@ export default function BookingPage() {
                           ))}
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3">
-                          <Button className="flex-1 rounded-2xl h-14 bg-black hover:bg-gray-800 font-bold group">
+                          <Button 
+                            onClick={() => setBookingTutor(tutor)}
+                            className="flex-1 rounded-2xl h-14 bg-black hover:bg-gray-800 font-bold group"
+                          >
                             Book a Session
                             <Calendar className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
                           </Button>
@@ -144,6 +204,9 @@ export default function BookingPage() {
         </div>
 
       </div>
+      
+      {/* Booking Modal */}
+      <BookingModal tutor={bookingTutor} onClose={() => setBookingTutor(null)} />
     </div>
   );
 }

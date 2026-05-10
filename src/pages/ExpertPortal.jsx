@@ -122,6 +122,34 @@ export default function ExpertPortal() {
               </div>
               
               <div className="space-y-8">
+                {/* Earnings / Payouts */}
+                <Card className="border-none shadow-sm rounded-3xl bg-white p-2">
+                  <CardHeader className="p-6 pb-2">
+                    <CardTitle className="text-xl font-bold flex items-center justify-between">
+                      Earnings 
+                      <span className="text-xs font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">Stripe Connect</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-6 pb-6">
+                    <div className="flex items-end gap-2 mb-6">
+                      <h3 className="text-4xl font-extrabold tracking-tight">$850.00</h3>
+                      <span className="text-gray-400 font-bold mb-1">/ May</span>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center text-sm font-bold">
+                        <span className="text-gray-500">Available to Payout</span>
+                        <span className="text-gray-900">$320.00</span>
+                      </div>
+                      <Button 
+                        onClick={() => alert("Future: Routes to Stripe Express Dashboard for instant payouts")}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 font-bold group"
+                      >
+                        Withdraw to Bank <ArrowUpRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <Card className="border-none shadow-sm rounded-3xl bg-black text-white p-2">
                   <CardHeader className="p-6">
                     <CardTitle className="text-xl">Platform Signal</CardTitle>
