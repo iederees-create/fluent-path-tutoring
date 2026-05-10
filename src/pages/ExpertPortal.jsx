@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   ShieldCheck, 
@@ -10,7 +11,9 @@ import {
   BarChart3,
   Users,
   Settings,
-  Bell
+  Bell,
+  Play,
+  GraduationCap
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -19,6 +22,7 @@ import SessionCard from "../components/SessionCard";
 export default function ExpertPortal() {
   const [step, setStep] = useState(1); // 1: Stats, 2: Verification
   const [isVerified, setIsVerified] = useState(false);
+  const [safetyAgreed, setSafetyAgreed] = useState(false);
 
   const stats = [
     { label: "Active Learners", value: "12", icon: Users, color: "text-blue-500" },
@@ -43,7 +47,12 @@ export default function ExpertPortal() {
             <h1 className="text-4xl font-display font-extrabold tracking-tight">Expert Command Center</h1>
             <p className="text-gray-500 mt-2">Manage your qualifications, learners, and platform performance.</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 hidden sm:flex">
+            <Link to="/guide">
+              <Button variant="outline" className="rounded-xl border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold">
+                <Play size={18} className="mr-2" /> ClassIn Guide
+              </Button>
+            </Link>
             <Button variant="outline" className="rounded-xl border-gray-200">
               <Bell size={18} className="mr-2" /> Notifications
             </Button>
@@ -177,16 +186,35 @@ export default function ExpertPortal() {
                   <p className="text-gray-400">Drag and drop your certificate here, or click to browse files.</p>
                 </div>
 
+                <div className="bg-blue-50 p-6 rounded-2xl flex items-start gap-4 border border-blue-100">
+                  <input 
+                    type="checkbox" 
+                    id="safety-check" 
+                    className="mt-1.5 w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300"
+                    checked={safetyAgreed}
+                    onChange={(e) => setSafetyAgreed(e.target.checked)}
+                  />
+                  <div>
+                    <label htmlFor="safety-check" className="font-bold text-gray-900 cursor-pointer select-none">
+                      I confirm the Mandatory Child Safety Declaration
+                    </label>
+                    <p className="text-sm text-gray-500 leading-relaxed mt-1">
+                      By checking this, I legally confirm I have no history of child abuse, violent records, or safeguarding violations. <Link to="/safety" className="text-blue-600 hover:underline">Read the full policy</Link>.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="bg-gray-50 p-6 rounded-2xl flex items-start gap-4">
                   <ShieldCheck className="text-gray-400 shrink-0 mt-1" size={20} />
                   <p className="text-sm text-gray-500 leading-relaxed">
-                    Our team will manually review your documents within 24-48 hours. You will receive an email once your profile is verified.
+                    Our team will manually review your documents and safety declaration within 24-48 hours. You will receive an email once your profile is verified.
                   </p>
                 </div>
 
                 <Button 
                   onClick={() => { setIsVerified(true); setStep(1); }}
-                  className="w-full h-16 rounded-2xl text-lg font-bold bg-black"
+                  disabled={!safetyAgreed}
+                  className="w-full h-16 rounded-2xl text-lg font-bold bg-black disabled:opacity-50"
                 >
                   Submit for Review
                 </Button>

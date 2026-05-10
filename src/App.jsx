@@ -22,6 +22,8 @@ import LearnerPortal from "./pages/LearnerPortal";
 import BookingPage from "./pages/BookingPage";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
+import SafetyPolicy from "./pages/SafetyPolicy";
+import ClassInGuide from "./pages/ClassInGuide";
 import { supabase } from "./lib/supabase";
 
 // --- Landing Page Component ---
@@ -232,6 +234,8 @@ export default function App() {
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/safety" element={<SafetyPolicy />} />
+            <Route path="/guide" element={<ClassInGuide />} />
           </Routes>
         </AnimatePresence>
 
@@ -259,10 +263,12 @@ export default function App() {
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">Legal</h4>
+                <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">Legal & Safety</h4>
                 <ul className="space-y-4 text-sm font-medium text-gray-600">
-                  <li><a href="#" className="hover:text-black">Privacy</a></li>
-                  <li><a href="#" className="hover:text-black">Terms</a></li>
+                  <li><a href="#" className="hover:text-black">Privacy Policy</a></li>
+                  <li><a href="#" className="hover:text-black">Terms of Service</a></li>
+                  <li><Link to="/safety" className="hover:text-black">Child Safety</Link></li>
+                  <li><Link to="/guide" className="hover:text-black">Tutor Guide</Link></li>
                 </ul>
               </div>
             </div>
