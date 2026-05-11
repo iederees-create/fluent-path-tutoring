@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const handleAuthCallback = async () => {
+      const params = new URLSearchParams(location.search)
       const { data: { user } } = await supabase.auth.getUser()
-      const params = new URLSearchParams(window.location.search)
       
-      if (params.get('type') === 'recovery') {
+      if (params.get('type') === 'recovery' || location.hash.includes('type=recovery')) {
         navigate('/update-password')
         return
       }
