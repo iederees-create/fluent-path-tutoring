@@ -29,7 +29,6 @@ import ClassInGuide from "./pages/ClassInGuide";
 import VideoRoom from "./pages/VideoRoom";
 import UpdatePassword from "./pages/UpdatePassword";
 import { supabase } from "./lib/supabase";
-import { processWebhookEvent } from "./lib/stripeWebhook";
 
 // --- Landing Page Component ---
 function LandingPage() {
