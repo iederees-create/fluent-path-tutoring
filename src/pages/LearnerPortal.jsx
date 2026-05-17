@@ -151,7 +151,10 @@ export default function LearnerPortal() {
           profileData = newProfile;
         }
 
-        if (user.email?.toLowerCase() === 'iedereesf@gmail.com') {
+        const emailVal = user.email || user.user_metadata?.email || "";
+        const isUserAdmin = emailVal.toLowerCase() === 'iedereesf@gmail.com' || emailVal.split('@')[0].toLowerCase() === 'iedereesf';
+
+        if (isUserAdmin) {
           if (profileData && profileData.role !== 'practitioner') {
             await supabase
               .from("profiles")

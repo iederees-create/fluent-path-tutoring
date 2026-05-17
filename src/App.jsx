@@ -693,7 +693,9 @@ function LandingPage() {
 function Navbar({ user }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const role = user?.email?.toLowerCase() === 'iedereesf@gmail.com' ? 'practitioner' : user?.user_metadata?.role;
+  const emailVal = user?.email || user?.user_metadata?.email || "";
+  const isUserAdmin = emailVal.toLowerCase() === 'iedereesf@gmail.com' || emailVal.split('@')[0].toLowerCase() === 'iedereesf';
+  const role = isUserAdmin ? 'practitioner' : user?.user_metadata?.role;
   const isExpert = role === 'practitioner';
 
   const { language, changeLanguage, t } = useTranslation();
