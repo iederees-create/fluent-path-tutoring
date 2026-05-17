@@ -8,13 +8,21 @@ import {
   ArrowUpRight,
   Plus,
   Clock,
-  Award
+  Award,
+  CheckCircle2,
+  ChevronRight,
+  ExternalLink,
+  MessageSquare,
+  Video,
+  ChevronDown,
+  Map
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import SessionCard from "../components/SessionCard";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { curriculumData } from "../lib/curriculum";
 
 export default function LearnerPortal() {
   const navigate = useNavigate();
@@ -22,6 +30,19 @@ export default function LearnerPortal() {
   const [profile, setProfile] = useState(null);
   const [upcomingSessions, setUpcomingSessions] = useState([]);
   const [activities, setActivities] = useState([]);
+  
+  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" or "roadmap"
+  const [expandedWeek, setExpandedWeek] = useState(5); // Default expand Week 5 (Current Week)
+  const [checkedWeeks, setCheckedWeeks] = useState(() => {
+    const saved = localStorage.getItem("fluentpath_checked_weeks");
+    return saved ? JSON.parse(saved) : { 1: true, 2: true, 3: true, 4: true }; // Pre-check foundation weeks
+  });
+
+  const toggleWeekCheck = (weekId) => {
+    const updated = { ...checkedWeeks, [weekId]: !checkedWeeks[weekId] };
+    setCheckedWeeks(updated);
+    localStorage.setItem("fluentpath_checked_weeks", JSON.stringify(updated));
+  };
 
   useEffect(() => {
     const fetchPortalData = async () => {
@@ -140,6 +161,24 @@ export default function LearnerPortal() {
           </Link>
         </div>
 
+        {/* Navigation Tabs */}
+        <div className="flex gap-4 border-b border-gray-200/60 pb-4 mb-8">
+          <Button 
+            onClick={() => setActiveTab("dashboard")}
+            variant={activeTab === "dashboard" ? "default" : "ghost"}
+            className={`rounded-xl h-11 font-bold ${activeTab === "dashboard" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+          >
+            <LayoutDashboard size={18} className="mr-2" /> Dashboard
+          </Button>
+          <Button 
+            onClick={() => setActiveTab("roadmap")}
+            variant={activeTab === "roadmap" ? "default" : "ghost"}
+            className={`rounded-xl h-11 font-bold ${activeTab === "roadmap" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+          >
+            <Map size={18} className="mr-2" /> 24-Week Roadmap
+          </Button>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {stats.map((stat, i) => (
@@ -161,48 +200,154 @@ export default function LearnerPortal() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content: Upcoming Sessions */}
+          {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <Card className="border-none shadow-sm rounded-3xl overflow-hidden bg-white">
-              <CardHeader className="p-8 pb-4">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl font-bold">Upcoming Sessions</CardTitle>
-                  <Button variant="ghost" className="text-sm font-bold text-blue-600 hover:bg-blue-50">View All</Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="space-y-4">
-                  {upcomingSessions.length > 0 ? (
-                    upcomingSessions.map((session, i) => (
-                      <SessionCard key={i} {...session} />
-                    ))
-                  ) : (
-                    <div className="text-center py-12 bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100 flex flex-col items-center justify-center p-6">
-                      <p className="text-gray-400 font-medium mb-4">No sessions scheduled yet.</p>
-                      <Link to="/booking">
-                        <Button className="rounded-xl h-11 bg-black text-white hover:bg-gray-800 font-bold">
-                          Book Your First Session
-                        </Button>
-                      </Link>
+            {activeTab === "dashboard" ? (
+              <>
+                <Card className="border-none shadow-sm rounded-3xl overflow-hidden bg-white">
+                  <CardHeader className="p-8 pb-4">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-2xl font-bold">Upcoming Sessions</CardTitle>
+                      <Button variant="ghost" className="text-sm font-bold text-blue-600 hover:bg-blue-50">View All</Button>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardHeader>
+                  <CardContent className="p-8 pt-0">
+                    <div className="space-y-4">
+                      {upcomingSessions.length > 0 ? (
+                        upcomingSessions.map((session, i) => (
+                          <SessionCard key={i} {...session} />
+                        ))
+                      ) : (
+                        <div className="text-center py-12 bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100 flex flex-col items-center justify-center p-6">
+                          <p className="text-gray-400 font-medium mb-4">No sessions scheduled yet.</p>
+                          <Link to="/booking">
+                            <Button className="rounded-xl h-11 bg-black text-white hover:bg-gray-800 font-bold">
+                              Book Your First Session
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Recommendations or Next Steps */}
-            <div className="bg-blue-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
-              <div className="relative z-10 max-w-md">
-                <h3 className="text-3xl font-display font-extrabold mb-4">Master IELTS Speaking</h3>
-                <p className="text-blue-100 text-lg leading-relaxed mb-8">
-                  Get targeted practice with our specialized exam experts to boost your score by 1.5+ bands.
-                </p>
-                <Button className="bg-white text-blue-600 hover:bg-blue-50 rounded-2xl h-14 px-8 font-bold">
-                  Start Specialization
-                </Button>
+                {/* Recommendations or Next Steps */}
+                <div className="bg-blue-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+                  <div className="relative z-10 max-w-md">
+                    <h3 className="text-3xl font-display font-extrabold mb-4">Master IELTS Speaking</h3>
+                    <p className="text-blue-100 text-lg leading-relaxed mb-8">
+                      Get targeted practice with our specialized exam experts to boost your score by 1.5+ bands.
+                    </p>
+                    <Button className="bg-white text-blue-600 hover:bg-blue-50 rounded-2xl h-14 px-8 font-bold">
+                      Start Specialization
+                    </Button>
+                  </div>
+                  <div className="absolute right-[-10%] bottom-[-20%] w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-6">
+                <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8">
+                  <CardHeader className="p-0 mb-8">
+                    <CardTitle className="text-2xl font-bold">24-Week Interactive Curriculum Roadmap</CardTitle>
+                    <CardDescription className="text-gray-400">Track your structural milestones, submit weekly homework deliverables, and launch classes directly.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="space-y-4">
+                      {curriculumData.map((week) => {
+                        const isCurrent = week.id === 5;
+                        const isCompleted = checkedWeeks[week.id] || week.id < 5;
+                        const isExpanded = expandedWeek === week.id;
+
+                        return (
+                          <div 
+                            key={week.id} 
+                            className={`border rounded-2xl p-5 transition-all duration-300 ${isCurrent ? 'border-blue-500 bg-blue-50/10' : 'border-gray-100 hover:border-gray-200'}`}
+                          >
+                            <div 
+                              onClick={() => setExpandedWeek(isExpanded ? null : week.id)}
+                              className="flex items-center justify-between cursor-pointer"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleWeekCheck(week.id);
+                                  }}
+                                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-gray-300 hover:border-black'}`}
+                                >
+                                  {isCompleted && <CheckCircle2 size={16} className="fill-current text-white" />}
+                                </div>
+                                <div>
+                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{week.module}</span>
+                                  <h4 className="text-lg font-bold text-gray-900 mt-0.5">Week {week.id}: {week.title}</h4>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ${isCurrent ? 'bg-blue-100 text-blue-700' : isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
+                                  {isCurrent ? "Current" : isCompleted ? "Completed" : "Upcoming"}
+                                </span>
+                                <ChevronDown size={18} className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                              </div>
+                            </div>
+
+                            {isExpanded && (
+                              <motion.div 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                className="mt-6 pt-6 border-t border-gray-100 space-y-4"
+                              >
+                                <div>
+                                  <h5 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Learning Objectives</h5>
+                                  <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1.5">
+                                    {week.objectives.map((obj, i) => (
+                                      <li key={i}>{obj}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div className="bg-gray-50/60 p-4 rounded-xl">
+                                  <h5 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Homework Deliverable</h5>
+                                  <p className="text-sm text-gray-700 font-medium">{week.deliverable}</p>
+                                </div>
+
+                                <div className="flex flex-wrap gap-3 pt-2">
+                                  <a 
+                                    href="https://meet.google.com" 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 text-xs font-bold bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl transition-all"
+                                  >
+                                    <Video size={14} className="text-blue-500" /> Google Meet
+                                  </a>
+                                  <a 
+                                    href="https://zoom.us" 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 text-xs font-bold bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl transition-all"
+                                  >
+                                    <ExternalLink size={14} className="text-indigo-500" /> Zoom Meeting
+                                  </a>
+                                  <a 
+                                    href="https://wa.me" 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 text-xs font-bold bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl transition-all"
+                                  >
+                                    <MessageSquare size={14} className="text-emerald-500" /> WhatsApp Call
+                                  </a>
+                                </div>
+                              </motion.div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="absolute right-[-10%] bottom-[-20%] w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
-            </div>
+            )}
           </div>
           
           {/* Sidebar: Activity/Progress */}
