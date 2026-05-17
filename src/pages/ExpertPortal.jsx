@@ -27,7 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Button } from "../components/ui/button";
 import SessionCard from "../components/SessionCard";
 import { supabase } from "../lib/supabase";
-import { curriculumData } from "../lib/curriculum";
+import { curriculumData, getLocalizedCurriculum } from "../lib/curriculum";
 import { evaluateHomeworkWithAI } from "../lib/aiEvaluationService";
 
 export default function ExpertPortal() {
