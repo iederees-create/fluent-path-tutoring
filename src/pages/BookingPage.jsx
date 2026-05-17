@@ -159,7 +159,7 @@ export default function BookingPage() {
               </div>
 
               <a 
-                href={`https://wa.me/27725550212?text=Hi%20FluentPath!%20I'd%20like%20to%20book%20a%20private%20session%20with%20tutor%20${encodeURIComponent(tutor.name)}%20for%20their%20${encodeURIComponent(tutor.specialties?.[0] || "General Conversational")}%20program.%20Let's%20find%20a%20time!`}
+                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I'd%20like%20to%20book%20a%20private%20session%20with%20tutor%20${encodeURIComponent(tutor.name)}%20for%20their%20${encodeURIComponent(tutor.specialties?.[0] || "General Conversational")}%20program.%20Let's%20find%20a%20time!`}
                 target="_blank"
                 rel="noreferrer"
                 className="block"

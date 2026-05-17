@@ -47,6 +47,21 @@ function LandingPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [stripeStatusText, setStripeStatusText] = useState("");
 
+  // Aura AI Chatbot States
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      sender: "aura",
+      text: "Hello! I am Aura, your AI Placement Advisor. 🌟 I help align our professional 24-week syllabus to your individual career targets. To begin, which language track would you like to master?",
+      options: ["🇬🇧 English", "🇪🇸 Spanish", "🇫🇷 French", "🇯🇵 Japanese"]
+    }
+  ]);
+  const [chatStep, setChatStep] = useState(1); // 1: Language selection, 2: Input details, 3: Scorecard & Offer
+  const [userChatInput, setUserChatInput] = useState("");
+  const [selectedChatLang, setSelectedChatLang] = useState("");
+  const [isChatAnalyzing, setIsChatAnalyzing] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -58,6 +73,52 @@ function LandingPage() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleChatOptionSelect = (langOption) => {
+    setSelectedChatLang(langOption);
+    setChatMessages(prev => [
+      ...prev,
+      { id: Date.now(), sender: "user", text: `I want to study the ${langOption} track.` },
+      { id: Date.now() + 1, sender: "aura", text: `Superb! To help me tailor your 24-week syllabus topics, please briefly tell me what you need this language for (e.g. business presentations, job interviews, or general travel confidence) and your current experience level.` }
+    ]);
+    setChatStep(2);
+  };
+
+  const handleSendChatMessage = async (e) => {
+    e.preventDefault();
+    if (!userChatInput.trim()) return;
+
+    const userInput = userChatInput;
+    setUserChatInput("");
+
+    setChatMessages(prev => [
+      ...prev,
+      { id: Date.now(), sender: "user", text: userInput }
+    ]);
+
+    setIsChatAnalyzing(true);
+    setChatStep(3);
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    setChatMessages(prev => [
+      ...prev,
+      { 
+        id: Date.now() + 1, 
+        sender: "aura", 
+        text: `Analysis complete! 📊 Based on your communication target details, here are your placement results:`,
+        scorecard: {
+          lang: selectedChatLang,
+          level: "B2 - Upper Intermediate",
+          grammar: "84%",
+          fluency: "79%",
+          recommendedPlan: "Professional Plan ($160/mo)",
+          whatsAppLink: `https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20completed%20the%20Aura%20AI%20diagnostic%20chat.%20I%20was%20placed%20at%20B2%20on%20the%20${encodeURIComponent(selectedChatLang)}%20track.%20I%20would%20like%20to%20activate%20my%20Professional%20Plan%20manually!`
+        }
+      }
+    ]);
+    setIsChatAnalyzing(false);
+  };
 
   const handleSelectTier = (tierName, price) => {
     setSelectedTier({ name: tierName, price });
@@ -367,12 +428,12 @@ function LandingPage() {
                   Cancel
                 </button>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold">
-                    S
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white font-bold">
+                    💬
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg leading-tight">Secure checkout powered by Stripe</h3>
-                    <p className="text-xs text-gray-400 font-medium">FluentPath Global Billing Portal</p>
+                    <h3 className="font-bold text-lg leading-tight">Direct WhatsApp Placement & Payment</h3>
+                    <p className="text-xs text-gray-400 font-medium">FluentPath Manual Enrollment Hotlines</p>
                   </div>
                 </div>
               </div>
@@ -385,9 +446,9 @@ function LandingPage() {
                       <CheckCircle2 size={48} />
                     </div>
                     <div>
-                      <h4 className="text-2xl font-extrabold text-gray-900">Subscription Active!</h4>
+                      <h4 className="text-2xl font-extrabold text-gray-900">Syllabus Sandbox Unlocked!</h4>
                       <p className="text-gray-500 text-sm mt-2 leading-relaxed">
-                        Excellent! Your secure simulation payment processed cleanly. The webhook has updated your Supabase profile to **{selectedTier.name}**.
+                        Success! Your sandbox profile has been instantly mapped to **{selectedTier.name}** for evaluation purposes.
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-2xl p-4 text-xs text-gray-500 font-medium text-left border border-gray-100">
@@ -401,7 +462,7 @@ function LandingPage() {
                     </Link>
                   </div>
                 ) : (
-                  <form onSubmit={handleSimulatePayment} className="space-y-6">
+                  <div className="space-y-6">
                     {/* Summary Info */}
                     <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
                       <div>
@@ -418,79 +479,45 @@ function LandingPage() {
                       <div className="text-center py-10 space-y-4">
                         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
                         <p className="text-sm font-bold text-gray-900 animate-pulse">{stripeStatusText}</p>
-                        <p className="text-xs text-gray-400">This simulates a live Stripe server-to-server gateway callback.</p>
+                        <p className="text-xs text-gray-400">Updating Supabase subscription state triggers...</p>
                       </div>
                     ) : (
                       <>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
-                            <input 
-                              type="email" 
-                              value={user?.email || "student@fluentpath.com"} 
-                              disabled 
-                              className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 font-bold text-sm"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Card Details</label>
-                            <div className="border border-gray-200 rounded-2xl overflow-hidden divide-y divide-gray-100">
-                              <input 
-                                type="text" 
-                                placeholder="Card Number" 
-                                value={cardNumber}
-                                onChange={(e) => setCardNumber(e.target.value)}
-                                required 
-                                className="w-full h-12 px-4 text-sm font-semibold focus:outline-none"
-                              />
-                              <div className="flex divide-x divide-gray-100">
-                                <input 
-                                  type="text" 
-                                  placeholder="MM / YY" 
-                                  value={cardExpiry}
-                                  onChange={(e) => setCardExpiry(e.target.value)}
-                                  required 
-                                  className="w-1/2 h-12 px-4 text-sm font-semibold focus:outline-none"
-                                />
-                                <input 
-                                  type="text" 
-                                  placeholder="CVC" 
-                                  value={cardCVC}
-                                  onChange={(e) => setCardCVC(e.target.value)}
-                                  required 
-                                  className="w-1/2 h-12 px-4 text-sm font-semibold focus:outline-none"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Cardholder Name</label>
-                            <input 
-                              type="text" 
-                              placeholder="John Doe" 
-                              value={cardName}
-                              onChange={(e) => setCardName(e.target.value)}
-                              required 
-                              className="w-full h-12 px-4 rounded-xl border border-gray-200 font-semibold text-sm focus:outline-none focus:border-blue-500"
-                            />
-                          </div>
+                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-5 space-y-3">
+                          <p className="text-xs font-bold text-emerald-800 uppercase tracking-widest">How manual activation works:</p>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            Click the button below to message our lead advisor at <strong>+27 61 092 2970</strong>. We will share your manual payment details (EFT/Bank Transfer) and instantly activate your portal account!
+                          </p>
                         </div>
 
-                        <Button 
-                          type="submit" 
-                          className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-md shadow-lg shadow-blue-600/20"
-                        >
-                          💸 Simulate Secure Stripe Payment
-                        </Button>
+                        <div className="space-y-3">
+                          <a 
+                            href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%2024-week%20curriculum%20under%20the%20${encodeURIComponent(selectedTier.name)}%20Plan%20using%20the%20email%20${encodeURIComponent(user?.email || "student@fluentpath.com")}.%20Please%20send%20me%20the%20payment%20instructions!`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block"
+                          >
+                            <Button 
+                              className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-md shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+                            >
+                              💬 Pay & Activate via WhatsApp
+                            </Button>
+                          </a>
+
+                          <Button 
+                            onClick={handleSimulatePayment}
+                            className="w-full h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-xs"
+                          >
+                            ⚡ Demo Sandbox Mode: Instant Unlock (Test Dashboard)
+                          </Button>
+                        </div>
 
                         <p className="text-[10px] text-center text-gray-400 font-medium leading-relaxed">
-                          🔒 SSL Secured 256-Bit Encryption. By continuing, you authorize a secure sandbox transaction. No real funds will be debited.
+                          🔒 Direct EFT / Manual Billing. For immediate support, call or text +27 61 092 2970 anytime.
                         </p>
                       </>
                     )}
-                  </form>
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -498,21 +525,167 @@ function LandingPage() {
         )}
       </AnimatePresence>
 
-      {/* Floating Pulse WhatsApp Sales Widget */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <a 
-          href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20have%20a%20few%20questions%20about%20your%20English%20tutoring%20curriculum%20and%20payouts.%20Could%20we%20chat?"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center justify-center w-16 h-16 rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-all duration-300 group relative"
+      {/* Raversus-style Aura AI Chat Advisor Widget */}
+      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end">
+        <AnimatePresence>
+          {isChatOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.95 }}
+              className="bg-white/95 backdrop-blur-xl border border-gray-100 rounded-[2rem] shadow-2xl w-[22rem] md:w-[24rem] h-[32rem] overflow-hidden flex flex-col mb-4 relative z-50"
+            >
+              {/* Header */}
+              <div className="bg-gray-900 text-white p-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white relative">
+                    <Sparkles size={16} />
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-gray-900" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm leading-tight flex items-center gap-1.5">
+                      Aura AI Placement Advisor
+                    </h4>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">FluentPath Live Diagnostic</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsChatOpen(false)}
+                  className="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-wider"
+                >
+                  Hide
+                </button>
+              </div>
+
+              {/* Messages Content */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/50">
+                {chatMessages.map((msg, i) => (
+                  <div 
+                    key={msg.id || i}
+                    className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className={`max-w-[85%] rounded-2xl p-4 text-xs font-semibold leading-relaxed shadow-sm ${msg.sender === "user" ? "bg-black text-white rounded-tr-none" : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"}`}>
+                      {msg.text}
+                      
+                      {/* Option Pills */}
+                      {msg.options && (
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          {msg.options.map((opt) => (
+                            <button
+                              key={opt}
+                              onClick={() => handleChatOptionSelect(opt)}
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-extrabold px-3 py-1.5 rounded-lg border border-blue-100 transition-colors"
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Scorecard block */}
+                      {msg.scorecard && (
+                        <div className="mt-4 bg-gray-900 text-white rounded-xl p-4 space-y-3">
+                          <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+                            <div>
+                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Syllabus Track</p>
+                              <p className="text-xs font-bold text-emerald-400">{msg.scorecard.lang}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Grade</p>
+                              <p className="text-xs font-bold text-blue-400">{msg.scorecard.level}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3 text-[10px]">
+                            <div>
+                              <p className="text-gray-400 font-bold">Grammar Accuracy</p>
+                              <p className="text-sm font-extrabold text-white mt-0.5">{msg.scorecard.grammar}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 font-bold">Speech Fluency</p>
+                              <p className="text-sm font-extrabold text-white mt-0.5">{msg.scorecard.fluency}</p>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-gray-800 space-y-2">
+                            <p className="text-[9px] font-bold text-gray-400 uppercase">Recommended Program</p>
+                            <p className="text-xs font-extrabold text-emerald-400">{msg.scorecard.recommendedPlan}</p>
+                            
+                            <a 
+                              href={msg.scorecard.whatsAppLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block"
+                            >
+                              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                                💬 Enroll & Pay via WhatsApp
+                              </button>
+                            </a>
+                            <button
+                              onClick={() => {
+                                handleSelectTier("Professional", 160);
+                                setIsChatOpen(false);
+                              }}
+                              className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 text-[9px] font-bold py-1.5 rounded-lg transition-colors"
+                            >
+                              ⚡ Demo Sandbox Mode: Unlock Portal
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {isChatAnalyzing && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                      <span className="text-[10px] text-gray-400 font-bold animate-pulse uppercase ml-1">Analyzing Placement...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Form Input */}
+              {chatStep === 2 && (
+                <form 
+                  onSubmit={handleSendChatMessage}
+                  className="p-4 border-t border-gray-100 bg-white flex gap-2 items-center"
+                >
+                  <input
+                    type="text"
+                    value={userChatInput}
+                    onChange={(e) => setUserChatInput(e.target.value)}
+                    placeholder="Describe your learning objectives..."
+                    className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:border-blue-500"
+                  />
+                  <Button type="submit" className="rounded-xl h-9 bg-black text-white hover:bg-gray-800 px-4 font-bold text-xs">
+                    Send
+                  </Button>
+                </form>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Bubble Trigger */}
+        <button 
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className="flex items-center justify-center w-16 h-16 rounded-full bg-black text-white shadow-2xl hover:scale-110 transition-all duration-300 relative group animate-bounce"
         >
-          <span className="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-35 animate-ping" />
-          <MessageCircle size={28} className="fill-current" />
+          <span className="absolute inline-flex h-full w-full rounded-full bg-black opacity-25 animate-ping" />
+          <MessageCircle size={28} className="fill-current text-white" />
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-black flex items-center justify-center text-[8px] font-extrabold">
+            !
+          </div>
           
           <div className="absolute right-20 bg-white border border-gray-100 text-gray-800 text-xs font-bold py-2.5 px-4 rounded-2xl shadow-xl w-48 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300 text-center">
-            💬 Chat Live with an Advisor
+            🤖 Talk to Aura AI Advisor
           </div>
-        </a>
+        </button>
       </div>
     </main>
   );
