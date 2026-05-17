@@ -693,7 +693,7 @@ function LandingPage() {
 function Navbar({ user }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const role = user?.user_metadata?.role;
+  const role = user?.email === 'iedereesf@gmail.com' ? 'practitioner' : user?.user_metadata?.role;
   const isExpert = role === 'practitioner';
 
   const { language, changeLanguage, t } = useTranslation();

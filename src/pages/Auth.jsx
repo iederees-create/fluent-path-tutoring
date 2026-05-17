@@ -56,7 +56,10 @@ export default function Auth() {
         password,
       });
       if (error) setMessage(error.message);
-      else navigate(role === "practitioner" ? "/expert" : "/");
+      else {
+        const finalRole = email === "iedereesf@gmail.com" ? "practitioner" : role;
+        navigate(finalRole === "practitioner" ? "/expert" : "/");
+      }
     }
     setLoading(false);
   };

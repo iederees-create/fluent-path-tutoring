@@ -17,7 +17,7 @@ export default function AuthCallback() {
       }
 
       if (user) {
-        const role = user.user_metadata?.role || 'learner'
+        const role = user.email === 'iedereesf@gmail.com' ? 'practitioner' : (user.user_metadata?.role || 'learner')
         
         // Ensure user has a profile in public.profiles table
         try {
@@ -27,7 +27,14 @@ export default function AuthCallback() {
             .eq('id', user.id)
             .maybeSingle()
 
-          if (!profile && !fetchError) {
+          if (profile) {
+            if (user.email === 'iedereesf@gmail.com' && profile.role !== 'practitioner') {
+              await supabase
+                .from('profiles')
+                .update({ role: 'practitioner' })
+                .eq('id', user.id)
+            }
+          } else if (!fetchError) {
             // Insert a default profile record
             await supabase.from('profiles').insert({
               id: user.id,
