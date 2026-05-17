@@ -807,6 +807,7 @@ export default function ExpertPortal() {
               </Card>
             )}
           </div>
+        </>
         ) : (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
