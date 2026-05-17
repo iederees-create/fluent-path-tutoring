@@ -42,7 +42,56 @@ export default function ExpertPortal() {
   const [totalSessionsCount, setTotalSessionsCount] = useState(142);
   const [earningsAmount, setEarningsAmount] = useState(850);
 
-  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" or "roadmap"
+  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "roadmap", or "admin-users"
+  
+  // Admin User Manager States
+  const [allUsers, setAllUsers] = useState([]);
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editPlan, setEditPlan] = useState("");
+  const [editLevel, setEditLevel] = useState("");
+
+  const fetchAllUsers = async () => {
+    setIsAdminLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (!error && data) {
+        setAllUsers(data);
+      }
+    } catch (err) {
+      console.error("Error fetching registered users:", err);
+    } finally {
+      setIsAdminLoading(false);
+    }
+  };
+
+  const handleUpdateUserProfile = async (userId) => {
+    if (!userId) return;
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          subscription_plan: editPlan,
+          current_level: editLevel
+        })
+        .eq("id", userId);
+      
+      if (!error) {
+        alert("Success! User plan and level updated. They can now access their online campus instantly.");
+        setSelectedUser(null);
+        fetchAllUsers(); // Reload list
+      } else {
+        alert("Failed to update profile: " + error.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An unexpected error occurred.");
+    }
+  };
   const [expandedWeek, setExpandedWeek] = useState(5); // Default to week 5 (Current class)
   const [targetLanguage, setTargetLanguage] = useState("English");
   const activeCurriculum = getLocalizedCurriculum(targetLanguage);
@@ -146,6 +195,12 @@ export default function ExpertPortal() {
     fetchExpertData();
   }, [navigate]);
 
+  useEffect(() => {
+    if (activeTab === "admin-users") {
+      fetchAllUsers();
+    }
+  }, [activeTab]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
@@ -190,20 +245,27 @@ export default function ExpertPortal() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-4 border-b border-gray-200/60 pb-4 mb-8">
+        <div className="flex gap-4 border-b border-gray-200/60 pb-4 mb-8 overflow-x-auto">
           <Button 
             onClick={() => setActiveTab("dashboard")}
             variant={activeTab === "dashboard" ? "default" : "ghost"}
-            className={`rounded-xl h-11 font-bold ${activeTab === "dashboard" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+            className={`rounded-xl h-11 font-bold shrink-0 ${activeTab === "dashboard" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
           >
             <BarChart3 size={18} className="mr-2" /> Performance Dashboard
           </Button>
           <Button 
             onClick={() => setActiveTab("roadmap")}
             variant={activeTab === "roadmap" ? "default" : "ghost"}
-            className={`rounded-xl h-11 font-bold ${activeTab === "roadmap" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+            className={`rounded-xl h-11 font-bold shrink-0 ${activeTab === "roadmap" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
           >
             <Map size={18} className="mr-2" /> Curriculum Roadmap
+          </Button>
+          <Button 
+            onClick={() => setActiveTab("admin-users")}
+            variant={activeTab === "admin-users" ? "default" : "ghost"}
+            className={`rounded-xl h-11 font-bold shrink-0 ${activeTab === "admin-users" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+          >
+            <Users size={18} className="mr-2" /> 👥 Admin User Manager
           </Button>
         </div>
 
@@ -233,7 +295,7 @@ export default function ExpertPortal() {
 
         {step === 1 ? (
           <>
-            {activeTab === "dashboard" ? (
+            {activeTab === "dashboard" && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                   {stats.map((stat, i) => (
@@ -325,7 +387,9 @@ export default function ExpertPortal() {
                   </div>
                 </div>
               </>
-            ) : (
+            )}
+
+            {activeTab === "roadmap" && (
               <div className="space-y-6">
                 <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8">
                   <CardHeader className="p-0 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -601,7 +665,147 @@ export default function ExpertPortal() {
                 </Card>
               </div>
             )}
-          </>
+
+            {activeTab === "admin-users" && (
+              <Card className="border-none shadow-sm rounded-3xl bg-white p-8">
+                <CardHeader className="p-0 mb-6">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    👥 Admin Student Activation Center
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 font-semibold mt-1">
+                    Manage registered student profiles, verify their payments, set target curriculum levels, and manually activate their interactive learning campus.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0 space-y-6">
+                  <div className="flex justify-end mb-4">
+                    <Button 
+                      onClick={fetchAllUsers}
+                      disabled={isAdminLoading}
+                      className="bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold h-10 px-4"
+                    >
+                      {isAdminLoading ? "Reloading..." : "🔄 Refresh Student Accounts"}
+                    </Button>
+                  </div>
+
+                  {isAdminLoading ? (
+                    <div className="text-center py-12">
+                      <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-xs text-gray-400 font-bold mt-3">Fetching accounts from Supabase...</p>
+                    </div>
+                  ) : allUsers.length > 0 ? (
+                    <div className="overflow-x-auto border border-gray-100 rounded-2xl">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-gray-50 text-gray-400 font-bold border-b border-gray-100 uppercase tracking-widest text-[9px]">
+                            <th className="p-4">Email</th>
+                            <th className="p-4">Active Plan</th>
+                            <th className="p-4">Current Level</th>
+                            <th className="p-4 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 font-semibold text-gray-700">
+                          {allUsers.map((u) => {
+                            const hasPlan = u.subscription_plan && u.subscription_plan !== "inactive" && u.subscription_plan !== "free";
+                            return (
+                              <tr key={u.id} className="hover:bg-gray-50/50">
+                                <td className="p-4 font-bold text-gray-900">{u.email}</td>
+                                <td className="p-4">
+                                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${hasPlan ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+                                    {u.subscription_plan || "inactive"}
+                                  </span>
+                                </td>
+                                <td className="p-4 font-extrabold text-blue-600">{u.current_level || "Not Assigned"}</td>
+                                <td className="p-4 text-right">
+                                  <Button 
+                                    onClick={() => {
+                                      setSelectedUser(u);
+                                      setEditPlan(u.subscription_plan || "inactive");
+                                      setEditLevel(u.current_level || "B2");
+                                    }}
+                                    className="bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-[10px] font-extrabold h-8 px-3"
+                                  >
+                                    ✏️ Edit & Activate
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-100 p-6">
+                      <p className="text-gray-400 font-medium">No registered students found in database.</p>
+                    </div>
+                  )}
+
+                  {/* Edit Activation Modal */}
+                  {selectedUser && (
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                      <motion.div 
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full border border-gray-100 space-y-6"
+                      >
+                        <div>
+                          <h4 className="text-lg font-bold text-gray-900">Activate Student Account</h4>
+                          <p className="text-xs text-gray-400 font-semibold mt-1">Updates profile in real-time. Student can access campus on refresh.</p>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-2xl p-4 text-xs font-semibold text-gray-600 space-y-1">
+                          <p>👤 <span className="text-gray-400">Account:</span> <span className="text-gray-900 font-bold">{selectedUser.email}</span></p>
+                          <p>🆔 <span className="text-gray-400">User ID:</span> {selectedUser.id}</p>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Select Program Plan</label>
+                            <select 
+                              value={editPlan}
+                              onChange={(e) => setEditPlan(e.target.value)}
+                              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-black"
+                            >
+                              <option value="inactive">🚫 Campus Inactive (None)</option>
+                              <option value="Launchpad">🚀 Launchpad Plan ($45 / session)</option>
+                              <option value="Professional">💼 Professional Plan ($160 / month)</option>
+                              <option value="Accelerator">⚡ Accelerator Plan ($290 / month)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Curriculum Level</label>
+                            <input 
+                              type="text" 
+                              value={editLevel}
+                              onChange={(e) => setEditLevel(e.target.value)}
+                              placeholder="e.g. B2, B2+, C1, A2"
+                              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-black"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button 
+                            onClick={() => setSelectedUser(null)}
+                            variant="outline"
+                            className="flex-1 rounded-xl h-11 text-xs font-bold border-gray-100"
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={() => handleUpdateUserProfile(selectedUser.id)}
+                            className="flex-1 rounded-xl h-11 text-xs font-bold bg-black text-white hover:bg-gray-800"
+                          >
+                            Save & Activate Campus
+                          </Button>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         ) : (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}

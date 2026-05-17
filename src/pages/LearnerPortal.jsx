@@ -15,7 +15,8 @@ import {
   MessageSquare,
   Video,
   ChevronDown,
-  Map
+  Map,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -31,8 +32,44 @@ export default function LearnerPortal() {
   const [upcomingSessions, setUpcomingSessions] = useState([]);
   const [activities, setActivities] = useState([]);
   
-  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" or "roadmap"
+  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "roadmap", or "aura-advisor"
   const [expandedWeek, setExpandedWeek] = useState(5); // Default expand Week 5 (Current Week)
+
+  // Student Success Advisor Chatbot States
+  const [advisorMessages, setAdvisorMessages] = useState([
+    {
+      id: 1,
+      sender: "aura",
+      text: "Hello! I am Aura, your Student Success Advisor. 🌟 How is your weekly learning roadmap going? Feel free to ask me questions about vocabulary, CEFR grammar points, or practice translations here!"
+    }
+  ]);
+  const [advisorInput, setAdvisorInput] = useState("");
+  const [isAdvisorTyping, setIsAdvisorTyping] = useState(false);
+
+  const handleSendAdvisorMessage = async (e) => {
+    e.preventDefault();
+    if (!advisorInput.trim()) return;
+
+    const userInput = advisorInput;
+    setAdvisorInput("");
+
+    setAdvisorMessages(prev => [...prev, { id: Date.now(), sender: "user", text: userInput }]);
+    setIsAdvisorTyping(true);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    let reply = "I'm always here to help! Let me know if you want to review vocabulary cards, draft business dialogues, or analyze grammatical structures for your active week.";
+    if (userInput.toLowerCase().includes("grammar") || userInput.toLowerCase().includes("cefr")) {
+      reply = "CEFR levels focus on communicative output. At B2, grammar accuracy is key! Practice writing compound structures and using precise transitional connectors (e.g. 'furthermore', 'notwithstanding').";
+    } else if (userInput.toLowerCase().includes("vocab") || userInput.toLowerCase().includes("word")) {
+      reply = "Expanding vocabulary range is a great focus! Try mastering business expressions like 'low-hanging fruit', 'leverage synergies', and 'align strategic priorities' for corporate presentations.";
+    } else if (userInput.toLowerCase().includes("homework") || userInput.toLowerCase().includes("assignment")) {
+      reply = "For your current weekly homework deliverable, try drafting a 300-word corporate proposal. Paste it here, and I'll analyze it for your tutor!";
+    }
+
+    setAdvisorMessages(prev => [...prev, { id: Date.now() + 1, sender: "aura", text: reply }]);
+    setIsAdvisorTyping(false);
+  };
   const [targetLanguage, setTargetLanguage] = useState("English");
   const activeCurriculum = getLocalizedCurriculum(targetLanguage);
 
@@ -76,7 +113,7 @@ export default function LearnerPortal() {
               learning_hours: 24,
               lessons_done: 18,
               current_level: "B2+",
-              subscription_plan: "Pay As You Go"
+              subscription_plan: "inactive"
             })
             .select()
             .single();
@@ -147,6 +184,98 @@ export default function LearnerPortal() {
     { label: "Current Level", value: profile?.current_level || "A1", icon: Award, color: "text-orange-500", bg: "bg-orange-50" },
   ];
 
+  const isPremiumActive = profile?.subscription_plan && profile?.subscription_plan !== "inactive" && profile?.subscription_plan !== "free";
+
+  if (!isPremiumActive) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-6">
+        <div className="max-w-4xl mx-auto text-center space-y-12">
+          <div>
+            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full uppercase tracking-widest">
+              Campus Access Inactive
+            </span>
+            <h1 className="text-4xl font-display font-extrabold tracking-tight mt-6 animate-pulse">
+              Activate Your Interactive 24-Week Campus
+            </h1>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto leading-relaxed text-sm font-medium">
+              Welcome to your student profile! To configure your custom language track, book 1-on-1 tutoring sessions, and unlock your roadmap, select a program tier below. 
+              Manual payment (EFT) activation is managed instantly via chat.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 text-left">
+            {/* Launchpad Card */}
+            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Conversational</span>
+                <h3 className="text-lg font-bold text-gray-900 mt-1">Launchpad Plan</h3>
+                <p className="text-2xl font-black text-blue-600 mt-2">$45<span className="text-xs font-bold text-gray-400">/ session</span></p>
+                <p className="text-xs text-gray-500 mt-4 leading-relaxed font-semibold">Perfect for flexible conversation practices with native speakers on-demand.</p>
+              </div>
+              <a 
+                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%20Launchpad%20Plan%20($45%2Fsession)%20for%20my%20registered%20account%20${encodeURIComponent(profile?.email || "")}.%20Please%20send%20me%20EFT%20instructions!`}
+                target="_blank"
+                rel="noreferrer"
+                className="block mt-6"
+              >
+                <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold h-11">
+                  Activate Launchpad
+                </Button>
+              </a>
+            </div>
+
+            {/* Professional Card */}
+            <div className="bg-white rounded-[2rem] p-6 border-2 border-blue-600 shadow-sm flex flex-col justify-between hover:shadow-md transition-all relative">
+              <span className="absolute -top-3 right-6 bg-blue-600 text-white text-[8px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full">
+                Most Popular
+              </span>
+              <div>
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Full Core Syllabus</span>
+                <h3 className="text-lg font-bold text-gray-900 mt-1">Professional Plan</h3>
+                <p className="text-2xl font-black text-blue-600 mt-2">$160<span className="text-xs font-bold text-gray-400">/ month</span></p>
+                <p className="text-xs text-gray-500 mt-4 leading-relaxed font-semibold">Weekly lessons, complete 24-week credentials path, and direct AI homework feedback.</p>
+              </div>
+              <a 
+                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%20Professional%20Plan%20($160%2Fmo)%20for%20my%20registered%20account%20${encodeURIComponent(profile?.email || "")}.%20Please%20send%20me%20EFT%20instructions!`}
+                target="_blank"
+                rel="noreferrer"
+                className="block mt-6"
+              >
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold h-11">
+                  Activate Professional
+                </Button>
+              </a>
+            </div>
+
+            {/* Accelerator Card */}
+            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Intensive Program</span>
+                <h3 className="text-lg font-bold text-gray-900 mt-1">Accelerator Plan</h3>
+                <p className="text-2xl font-black text-blue-600 mt-2">$290<span className="text-xs font-bold text-gray-400">/ month</span></p>
+                <p className="text-xs text-gray-500 mt-4 leading-relaxed font-semibold">Double weekly lessons, fast-track career milestones, and priority calendar support.</p>
+              </div>
+              <a 
+                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%20Accelerator%20Plan%20($290%2Fmo)%20for%20my%20registered%20account%20${encodeURIComponent(profile?.email || "")}.%20Please%20send%20me%20EFT%20instructions!`}
+                target="_blank"
+                rel="noreferrer"
+                className="block mt-6"
+              >
+                <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold h-11">
+                  Activate Accelerator
+                </Button>
+              </a>
+            </div>
+          </div>
+
+          <div className="text-xs text-gray-400 font-medium">
+            🔒 direct EFT activation • Live admissions advisor call/chat +27 61 092 2970
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -165,20 +294,27 @@ export default function LearnerPortal() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-4 border-b border-gray-200/60 pb-4 mb-8">
+        <div className="flex gap-4 border-b border-gray-200/60 pb-4 mb-8 overflow-x-auto">
           <Button 
             onClick={() => setActiveTab("dashboard")}
             variant={activeTab === "dashboard" ? "default" : "ghost"}
-            className={`rounded-xl h-11 font-bold ${activeTab === "dashboard" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+            className={`rounded-xl h-11 font-bold shrink-0 ${activeTab === "dashboard" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
           >
             <LayoutDashboard size={18} className="mr-2" /> Dashboard
           </Button>
           <Button 
             onClick={() => setActiveTab("roadmap")}
             variant={activeTab === "roadmap" ? "default" : "ghost"}
-            className={`rounded-xl h-11 font-bold ${activeTab === "roadmap" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+            className={`rounded-xl h-11 font-bold shrink-0 ${activeTab === "roadmap" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
           >
             <Map size={18} className="mr-2" /> 24-Week Roadmap
+          </Button>
+          <Button 
+            onClick={() => setActiveTab("aura-advisor")}
+            variant={activeTab === "aura-advisor" ? "default" : "ghost"}
+            className={`rounded-xl h-11 font-bold shrink-0 ${activeTab === "aura-advisor" ? "bg-black text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-100"}`}
+          >
+            <MessageSquare size={18} className="mr-2" /> 🤖 Aura success AI
           </Button>
         </div>
 
@@ -205,7 +341,7 @@ export default function LearnerPortal() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {activeTab === "dashboard" ? (
+            {activeTab === "dashboard" && (
               <>
                 <Card className="border-none shadow-sm rounded-3xl overflow-hidden bg-white">
                   <CardHeader className="p-8 pb-4">
@@ -248,7 +384,9 @@ export default function LearnerPortal() {
                   <div className="absolute right-[-10%] bottom-[-20%] w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
                 </div>
               </>
-            ) : (
+            )}
+
+            {activeTab === "roadmap" && (
               <div className="space-y-6">
                 <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8">
                   <CardHeader className="p-0 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -366,6 +504,54 @@ export default function LearnerPortal() {
                 </Card>
               </div>
             )}
+
+            {activeTab === "aura-advisor" && (
+              <Card className="border-none shadow-sm rounded-3xl bg-white p-8">
+                <CardHeader className="p-0 mb-6">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Sparkles className="text-blue-500 fill-current" size={24} /> Aura AI Student Success Advisor
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 font-semibold mt-1">
+                    Aura is here 24/7 to help you review syllabus concepts, practice active conversations, or answer homework grammar queries.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0 space-y-6">
+                  {/* Chat logs */}
+                  <div className="h-96 border border-gray-100 bg-gray-50/50 rounded-2xl p-5 overflow-y-auto space-y-4">
+                    {advisorMessages.map((msg, i) => (
+                      <div key={msg.id || i} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-[80%] p-4 rounded-2xl text-xs font-semibold leading-relaxed shadow-sm ${msg.sender === "user" ? "bg-black text-white rounded-tr-none" : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"}`}>
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+                    {isAdvisorTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chat input */}
+                  <form onSubmit={handleSendAdvisorMessage} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={advisorInput}
+                      onChange={(e) => setAdvisorInput(e.target.value)}
+                      placeholder="Ask Aura Success AI a question about your curriculum..."
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-semibold text-gray-700 focus:outline-none focus:border-black"
+                    />
+                    <Button type="submit" className="rounded-xl h-11 bg-black text-white hover:bg-gray-800 font-bold px-6">
+                      Send
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
           </div>
           
           {/* Sidebar: Activity/Progress */}
@@ -381,13 +567,19 @@ export default function LearnerPortal() {
                   <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Current Plan</p>
                   <p className="font-bold text-gray-900 text-lg">{profile?.subscription_plan || "Pay As You Go"}</p>
                 </div>
-                <Button 
-                  onClick={() => alert("Future: Routes to Stripe Customer Portal")}
-                  variant="outline" 
-                  className="w-full rounded-xl h-12 font-bold border-gray-100 group"
+                <a 
+                  href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20have%20a%20billing%20question%20regarding%20my%20${encodeURIComponent(profile?.subscription_plan || "Active")} Plan.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
                 >
-                  Manage Billing (Stripe) <ArrowUpRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full rounded-xl h-12 font-bold border-gray-100 group"
+                  >
+                    💬 Contact Billing Support <ArrowUpRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform text-emerald-500" />
+                  </Button>
+                </a>
               </CardContent>
             </Card>
 

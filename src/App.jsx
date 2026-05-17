@@ -113,7 +113,7 @@ function LandingPage() {
           grammar: "84%",
           fluency: "79%",
           recommendedPlan: "Professional Plan ($160/mo)",
-          whatsAppLink: `https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20completed%20the%20Aura%20AI%20diagnostic%20chat.%20I%20was%20placed%20at%20B2%20on%20the%20${encodeURIComponent(selectedChatLang)}%20track.%20I%20would%20like%20to%20activate%20my%20Professional%20Plan%20manually!`
+          whatsAppLink: `https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20completed%20the%20Aura%20AI%20diagnostic%20chat.%20I%20was%20placed%20at%20B2%20on%20the%20${encodeURIComponent(selectedChatLang)}%20track.%20I%20would%20like%20to%20activate%20my%20Professional%20Plan%20($160%2Fmo)%20manually!`
         }
       }
     ]);
@@ -121,6 +121,11 @@ function LandingPage() {
   };
 
   const handleSelectTier = (tierName, price) => {
+    if (!user) {
+      alert("Please create an account or sign in first to register your profile. After authentication, you will be able to select and manually activate your premium learning campus!");
+      window.location.href = "#/auth";
+      return;
+    }
     setSelectedTier({ name: tierName, price });
     setCheckoutSuccess(false);
     setIsCheckingOut(true);
@@ -492,7 +497,7 @@ function LandingPage() {
 
                         <div className="space-y-3">
                           <a 
-                            href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%2024-week%20curriculum%20under%20the%20${encodeURIComponent(selectedTier.name)}%20Plan%20using%20the%20email%20${encodeURIComponent(user?.email || "student@fluentpath.com")}.%20Please%20send%20me%20the%20payment%20instructions!`}
+                            href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%2024-week%20curriculum%20under%20the%20${encodeURIComponent(selectedTier.name)}%20Plan%20($$${selectedTier.price}%2Fmo)%20using%20the%20email%20${encodeURIComponent(user?.email || "student@fluentpath.com")}.%20Please%20send%20me%20the%20payment%20instructions!`}
                             target="_blank"
                             rel="noreferrer"
                             className="block"
@@ -503,13 +508,6 @@ function LandingPage() {
                               💬 Pay & Activate via WhatsApp
                             </Button>
                           </a>
-
-                          <Button 
-                            onClick={handleSimulatePayment}
-                            className="w-full h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-xs"
-                          >
-                            ⚡ Demo Sandbox Mode: Instant Unlock (Test Dashboard)
-                          </Button>
                         </div>
 
                         <p className="text-[10px] text-center text-gray-400 font-medium leading-relaxed">
