@@ -150,6 +150,19 @@ export default function LearnerPortal() {
             .single();
           profileData = newProfile;
         }
+
+        if (user.email?.toLowerCase() === 'iedereesf@gmail.com') {
+          if (profileData && profileData.role !== 'practitioner') {
+            await supabase
+              .from("profiles")
+              .update({ role: "practitioner" })
+              .eq("id", user.id);
+            profileData.role = "practitioner";
+          }
+          navigate("/expert");
+          return;
+        }
+
         setProfile(profileData);
 
         // 2. Fetch Bookings (joining Tutors table)
