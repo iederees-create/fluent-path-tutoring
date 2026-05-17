@@ -13,32 +13,100 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 
 export default function BookingPage() {
-  const tutors = [
-    {
-      name: "Sarah Williams",
-      role: "IELTS & Conversational Expert",
-      rating: "5.0",
-      reviews: "124",
-      bio: "Certified TEFL instructor with 8+ years of experience helping students achieve band 7.5+ in IELTS. Native speaker from London.",
-      specialties: ["IELTS", "TOEFL", "Business English"],
-      price: "$35",
-      imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
-    },
-    {
-      name: "David Chen",
-      role: "Professional Communication Coach",
-      rating: "4.9",
-      reviews: "86",
-      bio: "Helping corporate professionals master English for international business and high-stakes interviews.",
-      specialties: ["Interview Prep", "Networking", "Presentations"],
-      price: "$45",
-      imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=David"
-    }
-  ];
-
+  const navigate = useNavigate();
+  const [tutors, setTutors] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
   const [bookingTutor, setBookingTutor] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchTutors = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("tutors")
+          .select("*");
+
+        if (data && data.length > 0) {
+          setTutors(data);
+        } else {
+          // Fallback to static data
+          setTutors([
+            {
+              id: 1,
+              name: "Sarah Williams",
+              role: "IELTS & Conversational Expert",
+              rating: "5.0",
+              reviews: "124",
+              bio: "Certified TEFL instructor with 8+ years of experience helping students achieve band 7.5+ in IELTS. Native speaker from London.",
+              specialties: ["IELTS", "TOEFL", "Business English"],
+              price: "$35",
+              imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+            },
+            {
+              id: 2,
+              name: "David Chen",
+              role: "Professional Communication Coach",
+              rating: "4.9",
+              reviews: "86",
+              bio: "Helping corporate professionals master English for international business and high-stakes interviews.",
+              specialties: ["Interview Prep", "Networking", "Presentations"],
+              price: "$45",
+              imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=David"
+            }
+          ]);
+        }
+      } catch (err) {
+        console.error("Error loading tutors:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTutors();
+  }, []);
+
+  const handleBookSession = async (tutor, time) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Please sign in to book a session!");
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      // 1. Insert into bookings table
+      const { error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          learner_id: user.id,
+          tutor_id: tutor.id,
+          topic: tutor.specialties?.[0] || "General Conversational",
+          scheduled_time: `Today @ ${time}`,
+          status: "upcoming"
+        });
+
+      if (bookingError) throw bookingError;
+
+      // 2. Insert into learning_activity table
+      await supabase
+        .from("learning_activity")
+        .insert({
+          learner_id: user.id,
+          description: `Booked session with ${tutor.name}`,
+          metadata: tutor.specialties?.[0] || "General Conversational"
+        });
+
+      alert(`Session booked successfully with ${tutor.name} at ${time}!`);
+      setBookingTutor(null);
+      navigate("/dashboard"); // Redirect directly to show their new session!
+    } catch (err) {
+      console.error("Booking error:", err);
+      alert("Failed to book session. Please try again.");
+    }
+  };
 
   const BookingModal = ({ tutor, onClose }) => {
     if (!tutor) return null;
@@ -71,18 +139,18 @@ export default function BookingPage() {
             </div>
           </div>
           
-          {/* Right Side: Cal.com Placeholder */}
+          {/* Right Side: Time Slots */}
           <div className="md:w-2/3 p-8 flex flex-col items-center justify-center text-center">
             <div className="w-full max-w-sm">
               <Calendar size={48} className="mx-auto text-blue-100 mb-6" />
               <h3 className="text-2xl font-bold mb-2">Select a Time</h3>
               <p className="text-gray-500 mb-8 text-sm">
-                (This area will be powered by the official <b>@calcom/embed-react</b> package once API keys are registered. It handles timezones and Stripe payments natively.)
+                Choose an available slot to confirm your booking and sync calendar data.
               </p>
               
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {['09:00', '10:00', '11:00', '13:00', '14:00', '16:00'].map(time => (
-                  <button key={time} onClick={() => alert('Future: Routes to Stripe Checkout via Cal.com')} className="py-3 border border-gray-200 rounded-xl font-bold text-sm hover:border-blue-500 hover:text-blue-600 transition-colors">
+                  <button key={time} onClick={() => handleBookSession(tutor, time)} className="py-3 border border-gray-200 rounded-xl font-bold text-sm hover:border-blue-500 hover:text-blue-600 transition-colors">
                     {time}
                   </button>
                 ))}

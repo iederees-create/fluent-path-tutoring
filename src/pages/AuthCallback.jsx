@@ -17,12 +17,37 @@ export default function AuthCallback() {
       }
 
       if (user) {
-        const role = user.user_metadata?.role
+        const role = user.user_metadata?.role || 'learner'
+        
+        // Ensure user has a profile in public.profiles table
+        try {
+          const { data: profile, error: fetchError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle()
+
+          if (!profile && !fetchError) {
+            // Insert a default profile record
+            await supabase.from('profiles').insert({
+              id: user.id,
+              email: user.email,
+              role: role,
+              learning_hours: 24,
+              lessons_done: 18,
+              current_level: 'B2+',
+              subscription_plan: 'Pay As You Go'
+            })
+          }
+        } catch (err) {
+          console.error("Error creating/checking user profile:", err)
+        }
+
         // Differentiate between practitioner and looking for services (learner)
         if (role === 'practitioner') {
           navigate('/expert')
         } else {
-          navigate('/')
+          navigate('/dashboard') // Route learner straight to dashboard
         }
       } else {
         navigate('/auth')

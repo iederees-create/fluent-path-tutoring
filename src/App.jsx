@@ -13,8 +13,10 @@ import {
   LayoutDashboard,
   UserCircle,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
+import { LanguageProvider, useTranslation } from "./context/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import ExpertPortal from "./pages/ExpertPortal";
@@ -30,6 +32,7 @@ import { supabase } from "./lib/supabase";
 
 // --- Landing Page Component ---
 function LandingPage() {
+  const { t } = useTranslation();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -55,29 +58,29 @@ function LandingPage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold mb-8 border border-blue-100"
         >
           <Sparkles size={16} />
-          <span>Master Conversational English</span>
+          <span>{t("hero.badge")}</span>
         </motion.div>
         
         <h1 className="text-6xl md:text-7xl font-display font-extrabold mb-8 tracking-tight leading-[1.1] text-gradient">
-          Conversational English for <br />
-          <span className="text-black">Real Life Confidence</span>
+          {t("hero.title1")} <br />
+          <span className="text-black">{t("hero.title2")}</span>
         </h1>
         <p className="text-xs text-gray-300 mb-4 opacity-50">v1.0.3-deployed</p>
         
         <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-          The first credentialed ecosystem connecting expert tutors with ambitious global learners. Master conversation, exams, and professional English.
+          {t("hero.subtitle")}
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/booking">
             <Button size="lg" className="text-lg rounded-2xl bg-black hover:bg-gray-800 px-10 h-14 group">
-              Find Your Expert
+              {t("hero.findExpert")}
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
           <Link to="/auth?role=practitioner">
             <Button size="lg" variant="outline" className="text-lg rounded-2xl px-10 h-14 border-gray-200">
-              Become a Tutor
+              {t("hero.becomeTutor")}
             </Button>
           </Link>
         </div>
@@ -97,11 +100,11 @@ function LandingPage() {
               <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 mb-4 group-hover:scale-110 transition-transform">
                 <MessageCircle size={28} />
               </div>
-              <CardTitle className="text-2xl mb-4">Conversational English</CardTitle>
+              <CardTitle className="text-2xl mb-4">{t("features.conversationalTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-500 leading-relaxed">
-                Speak naturally and confidently in everyday situations. Practical, real-life conversations from day one.
+                {t("features.conversationalDesc")}
               </p>
             </CardContent>
           </Card>
@@ -113,11 +116,11 @@ function LandingPage() {
               <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform">
                 <GraduationCap size={28} />
               </div>
-              <CardTitle className="text-2xl mb-4">Exam Preparation</CardTitle>
+              <CardTitle className="text-2xl mb-4">{t("features.examTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-500 leading-relaxed">
-                IELTS, TOEFL, and TEFL support with structured lessons and mock assessments to hit your target score.
+                {t("features.examDesc")}
               </p>
             </CardContent>
           </Card>
@@ -129,11 +132,11 @@ function LandingPage() {
               <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
                 <Briefcase size={28} />
               </div>
-              <CardTitle className="text-2xl mb-4">Professional Skills</CardTitle>
+              <CardTitle className="text-2xl mb-4">{t("features.skillsTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-500 leading-relaxed">
-                Master Business English, interview preparation, and workplace communication to advance your global career.
+                {t("features.skillsDesc")}
               </p>
             </CardContent>
           </Card>
@@ -150,6 +153,48 @@ function Navbar({ user }) {
   const role = user?.user_metadata?.role;
   const isExpert = role === 'practitioner';
 
+  const { language, changeLanguage, t } = useTranslation();
+  const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
+
+  useEffect(() => {
+    if (showGoogleTranslate) {
+      window.googleTranslateElementInit = () => {
+        new window.google.translate.TranslateElement({
+          pageLanguage: 'en',
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+        }, 'google_translate_element');
+      };
+
+      if (!document.getElementById('google-translate-script')) {
+        const script = document.createElement('script');
+        script.id = 'google-translate-script';
+        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        document.body.appendChild(script);
+      }
+    }
+  }, [showGoogleTranslate]);
+
+  const languagesList = [
+    { code: "en", name: "🇺🇸 English" },
+    { code: "es", name: "🇪🇸 Español" },
+    { code: "pt", name: "🇧🇷 Português" },
+    { code: "ja", name: "🇯🇵 日本語" },
+    { code: "zh", name: "🇨🇳 中文" },
+    { code: "tr", name: "🇹🇷 Türkçe" },
+    { code: "fr", name: "🇫🇷 Français" },
+    { code: "de", name: "🇩🇪 Deutsch" },
+    { code: "more", name: "🌐 More Languages..." }
+  ];
+
+  const handleLanguageChange = (val) => {
+    if (val === "more") {
+      setShowGoogleTranslate(true);
+    } else {
+      setShowGoogleTranslate(false);
+      changeLanguage(val);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
@@ -165,9 +210,40 @@ function Navbar({ user }) {
           <span className="font-display font-bold text-xl tracking-tight">FluentPath</span>
         </Link>
         
-        <div className="hidden md:flex items-center gap-8">
-          <Link to="/booking" className="text-sm font-bold text-gray-500 hover:text-black transition-colors">Find Tutors</Link>
-          <div className="w-px h-6 bg-gray-200 mx-2" />
+        <div className="hidden md:flex items-center gap-6">
+          <Link to="/booking" className="text-sm font-bold text-gray-500 hover:text-black transition-colors">
+            {t("nav.findTutors")}
+          </Link>
+          
+          {/* Geolocation/Manual Dropdown Override */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex items-center">
+              <select
+                value={showGoogleTranslate ? "more" : language}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                className="appearance-none bg-gray-50/50 border border-gray-200/50 rounded-xl px-3 py-1.5 pr-8 text-xs font-bold text-gray-600 focus:outline-none focus:ring-1 focus:ring-black cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                {languagesList.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute right-2 flex items-center text-gray-400">
+                <ChevronDown size={12} />
+              </div>
+            </div>
+
+            {showGoogleTranslate && (
+              <div 
+                id="google_translate_element" 
+                className="google-translate-dropdown bg-white border border-gray-200 rounded-xl p-1 shadow-sm transition-all"
+              />
+            )}
+          </div>
+
+          <div className="w-px h-6 bg-gray-200" />
+          
           {user ? (
             <div className="flex items-center gap-6">
               <Link 
@@ -175,7 +251,7 @@ function Navbar({ user }) {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 text-gray-900 font-bold text-sm border border-gray-200 hover:border-black transition-all"
               >
                 <LayoutDashboard size={16} />
-                {isExpert ? "Expert Portal" : "My Learning"}
+                {isExpert ? t("nav.expertPortal") : t("nav.myLearning")}
               </Link>
               <div className="flex items-center gap-3">
                 <div className="text-right">
@@ -192,10 +268,12 @@ function Navbar({ user }) {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <Link to="/auth" className="text-sm font-bold text-gray-500 hover:text-black">Sign In</Link>
+              <Link to="/auth" className="text-sm font-bold text-gray-500 hover:text-black">
+                {t("nav.signIn")}
+              </Link>
               <Link to="/auth?signup=true">
                 <Button className="rounded-xl h-10 px-6 bg-black font-bold">
-                  Get Started
+                  {t("nav.getStarted")}
                 </Button>
               </Link>
             </div>
@@ -206,8 +284,9 @@ function Navbar({ user }) {
   );
 }
 
-export default function App() {
+function AppContent() {
   const [user, setUser] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check current session
@@ -254,34 +333,42 @@ export default function App() {
                 <span className="font-display font-bold text-lg tracking-tight">FluentPath</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Empowering global learners to speak with confidence through real-world conversation and expert guidance.
+                {t("footer.desc")}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-20">
               <div>
-                <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">Platform</h4>
+                <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">{t("footer.platform")}</h4>
                 <ul className="space-y-4 text-sm font-medium text-gray-600">
-                  <li><Link to="/booking" className="hover:text-black">Find Tutors</Link></li>
-                  <li><Link to="/auth?role=practitioner" className="hover:text-black">For Experts</Link></li>
-                  <li><Link to="/dashboard" className="hover:text-black">Learning Portal</Link></li>
+                  <li><Link to="/booking" className="hover:text-black">{t("nav.findTutors")}</Link></li>
+                  <li><Link to="/auth?role=practitioner" className="hover:text-black">{t("footer.experts")}</Link></li>
+                  <li><Link to="/dashboard" className="hover:text-black">{t("footer.learningPortal")}</Link></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">Legal & Safety</h4>
+                <h4 className="font-bold mb-6 uppercase text-xs tracking-widest text-gray-400">{t("footer.legal")}</h4>
                 <ul className="space-y-4 text-sm font-medium text-gray-600">
-                  <li><a href="#" className="hover:text-black">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-black">Terms of Service</a></li>
-                  <li><Link to="/safety" className="hover:text-black">Child Safety</Link></li>
-                  <li><Link to="/guide" className="hover:text-black">Tutor Guide</Link></li>
+                  <li><a href="#" className="hover:text-black">{t("footer.privacy")}</a></li>
+                  <li><a href="#" className="hover:text-black">{t("footer.terms")}</a></li>
+                  <li><Link to="/safety" className="hover:text-black">{t("footer.childSafety")}</Link></li>
+                  <li><Link to="/guide" className="hover:text-black">{t("footer.tutorGuide")}</Link></li>
                 </ul>
               </div>
             </div>
           </div>
           <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-gray-50 flex justify-between items-center text-xs text-gray-400 font-medium">
-            <p>© 2026 FluentPath Ecosystem. All rights reserved.</p>
+            <p>{t("footer.rights")}</p>
           </div>
         </footer>
       </div>
     </Router>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
