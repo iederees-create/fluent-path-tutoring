@@ -22,7 +22,7 @@ import { Button } from "../components/ui/button";
 import SessionCard from "../components/SessionCard";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { curriculumData } from "../lib/curriculum";
+import { curriculumData, getLocalizedCurriculum } from "../lib/curriculum";
 
 export default function LearnerPortal() {
   const navigate = useNavigate();
@@ -33,6 +33,9 @@ export default function LearnerPortal() {
   
   const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" or "roadmap"
   const [expandedWeek, setExpandedWeek] = useState(5); // Default expand Week 5 (Current Week)
+  const [targetLanguage, setTargetLanguage] = useState("English");
+  const activeCurriculum = getLocalizedCurriculum(targetLanguage);
+
   const [checkedWeeks, setCheckedWeeks] = useState(() => {
     const saved = localStorage.getItem("fluentpath_checked_weeks");
     return saved ? JSON.parse(saved) : { 1: true, 2: true, 3: true, 4: true }; // Pre-check foundation weeks
@@ -248,13 +251,28 @@ export default function LearnerPortal() {
             ) : (
               <div className="space-y-6">
                 <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8">
-                  <CardHeader className="p-0 mb-8">
-                    <CardTitle className="text-2xl font-bold">24-Week Interactive Curriculum Roadmap</CardTitle>
-                    <CardDescription className="text-gray-400">Track your structural milestones, submit weekly homework deliverables, and launch classes directly.</CardDescription>
+                  <CardHeader className="p-0 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                      <CardTitle className="text-2xl font-bold">24-Week Interactive Curriculum Roadmap</CardTitle>
+                      <CardDescription className="text-gray-400">Track your structural milestones, submit weekly homework deliverables, and launch classes directly.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">Language Track:</span>
+                      <select 
+                        value={targetLanguage} 
+                        onChange={(e) => setTargetLanguage(e.target.value)}
+                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-black"
+                      >
+                        <option value="English">🇬🇧 English Track</option>
+                        <option value="Spanish">🇪🇸 Spanish Track</option>
+                        <option value="French">🇫🇷 French Track</option>
+                        <option value="Japanese">🇯🇵 Japanese Track</option>
+                      </select>
+                    </div>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="space-y-4">
-                      {curriculumData.map((week) => {
+                      {activeCurriculum.map((week) => {
                         const isCurrent = week.id === 5;
                         const isCompleted = checkedWeeks[week.id] || week.id < 5;
                         const isExpanded = expandedWeek === week.id;

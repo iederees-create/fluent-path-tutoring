@@ -29,10 +29,86 @@ import ClassInGuide from "./pages/ClassInGuide";
 import VideoRoom from "./pages/VideoRoom";
 import UpdatePassword from "./pages/UpdatePassword";
 import { supabase } from "./lib/supabase";
+import { processWebhookEvent } from "./lib/stripeWebhook";
 
 // --- Landing Page Component ---
 function LandingPage() {
   const { t } = useTranslation();
+
+  // Automated Subscription States
+  const [user, setUser] = useState(null);
+  const [selectedTier, setSelectedTier] = useState(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("4242 4242 4242 4242");
+  const [cardExpiry, setCardExpiry] = useState("12/28");
+  const [cardCVC, setCardCVC] = useState("123");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [stripeStatusText, setStripeStatusText] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSelectTier = (tierName, price) => {
+    setSelectedTier({ name: tierName, price });
+    setCheckoutSuccess(false);
+    setIsCheckingOut(true);
+  };
+
+  const handleSimulatePayment = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    
+    // Simulate high-ticket real-time Stripe gateway loading sequences
+    const steps = [
+      "Establishing secure Stripe gateway link...",
+      "Encrypting high-grade credit token...",
+      "Validating merchant ledger details...",
+      "Processing card authorization...",
+      "Triggering database subscription activation webhook...",
+      "Payment processed successfully!"
+    ];
+
+    for (let i = 0; i < steps.length; i++) {
+      setStripeStatusText(steps[i]);
+      await new Promise(resolve => setTimeout(resolve, 400));
+    }
+
+    const mockEmail = user?.email || "student@fluentpath.com";
+    const mockEvent = {
+      type: "customer.subscription.created",
+      data: {
+        object: {
+          id: `sub_sim_${Math.random().toString(36).substr(2, 9)}`,
+          customer_email: mockEmail,
+          metadata: {
+            customer_email: mockEmail,
+            tier: selectedTier.name.toLowerCase()
+          }
+        }
+      }
+    };
+
+    const res = await processWebhookEvent(mockEvent);
+
+    setIsProcessing(false);
+    if (res.success) {
+      setCheckoutSuccess(true);
+    } else {
+      alert("Simulated transaction failed: " + res.error);
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -183,17 +259,13 @@ function LandingPage() {
                 </li>
               </ul>
             </div>
-            <a 
-              href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20would%20like%20to%20start%20with%20the%20Launchpad%20Program%20($45/session).%20Let's%20discuss%20my%20goals!" 
-              target="_blank" 
-              rel="noreferrer"
-              className="w-full mt-auto"
+            <Button 
+              onClick={() => handleSelectTier("Launchpad", 45)}
+              className="w-full rounded-2xl h-14 bg-black hover:bg-gray-800 text-white font-bold group mt-auto"
             >
-              <Button className="w-full rounded-2xl h-14 bg-black hover:bg-gray-800 text-white font-bold group">
-                Select Launchpad
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
-              </Button>
-            </a>
+              Select Launchpad
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+            </Button>
           </Card>
 
           {/* Tier 2 */}
@@ -227,17 +299,13 @@ function LandingPage() {
                 </li>
               </ul>
             </div>
-            <a 
-              href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20would%20like%20to%20enroll%20in%20the%2024-Week%20Professional%20Program%20($160/month).%20Let's%20discuss%20my%20goals!" 
-              target="_blank" 
-              rel="noreferrer"
-              className="w-full mt-auto"
+            <Button 
+              onClick={() => handleSelectTier("Professional", 160)}
+              className="w-full rounded-2xl h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold group mt-auto"
             >
-              <Button className="w-full rounded-2xl h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold group">
-                Select Professional
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
-              </Button>
-            </a>
+              Select Professional
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+            </Button>
           </Card>
 
           {/* Tier 3 */}
@@ -268,20 +336,167 @@ function LandingPage() {
                 </li>
               </ul>
             </div>
-            <a 
-              href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20would%20like%20to%20enroll%20in%20the%2024-Week%20Accelerator%20Program%20($290/month).%20Let's%20discuss%20my%20goals!" 
-              target="_blank" 
-              rel="noreferrer"
-              className="w-full mt-auto"
+            <Button 
+              onClick={() => handleSelectTier("Accelerator", 290)}
+              className="w-full rounded-2xl h-14 bg-black hover:bg-gray-800 text-white font-bold group mt-auto"
             >
-              <Button className="w-full rounded-2xl h-14 bg-black hover:bg-gray-800 text-white font-bold group">
-                Select Accelerator
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
-              </Button>
-            </a>
+              Select Accelerator
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+            </Button>
           </Card>
         </div>
       </motion.section>
+
+      {/* Stripe Simulated Checkout Modal */}
+      <AnimatePresence>
+        {isCheckingOut && selectedTier && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative border border-gray-100"
+            >
+              {/* Header */}
+              <div className="bg-gray-900 text-white p-6 relative">
+                <button 
+                  onClick={() => setIsCheckingOut(false)} 
+                  className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider"
+                  disabled={isProcessing}
+                >
+                  Cancel
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold">
+                    S
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg leading-tight">Secure checkout powered by Stripe</h3>
+                    <p className="text-xs text-gray-400 font-medium">FluentPath Global Billing Portal</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-8">
+                {checkoutSuccess ? (
+                  <div className="text-center py-6 space-y-6">
+                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto animate-bounce">
+                      <CheckCircle2 size={48} />
+                    </div>
+                    <div>
+                      <h4 className="text-2xl font-extrabold text-gray-900">Subscription Active!</h4>
+                      <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+                        Excellent! Your secure simulation payment processed cleanly. The webhook has updated your Supabase profile to **{selectedTier.name}**.
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded-2xl p-4 text-xs text-gray-500 font-medium text-left border border-gray-100">
+                      <p>🎉 24-Week interactive curriculum fully unlocked</p>
+                      <p className="mt-1">📬 Placement director notified to verify tutor pairing</p>
+                    </div>
+                    <Link to="/dashboard" onClick={() => setIsCheckingOut(false)} className="block">
+                      <Button className="w-full h-14 bg-black hover:bg-gray-800 text-white rounded-2xl font-bold text-md shadow-lg shadow-black/10">
+                        Go to My Learning Portal
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSimulatePayment} className="space-y-6">
+                    {/* Summary Info */}
+                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscribing to</p>
+                        <p className="text-lg font-extrabold text-gray-900">{selectedTier.name}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-black text-blue-600">${selectedTier.price}</p>
+                        <p className="text-xs font-bold text-gray-400">/ month</p>
+                      </div>
+                    </div>
+
+                    {isProcessing ? (
+                      <div className="text-center py-10 space-y-4">
+                        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                        <p className="text-sm font-bold text-gray-900 animate-pulse">{stripeStatusText}</p>
+                        <p className="text-xs text-gray-400">This simulates a live Stripe server-to-server gateway callback.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
+                            <input 
+                              type="email" 
+                              value={user?.email || "student@fluentpath.com"} 
+                              disabled 
+                              className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 font-bold text-sm"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Card Details</label>
+                            <div className="border border-gray-200 rounded-2xl overflow-hidden divide-y divide-gray-100">
+                              <input 
+                                type="text" 
+                                placeholder="Card Number" 
+                                value={cardNumber}
+                                onChange={(e) => setCardNumber(e.target.value)}
+                                required 
+                                className="w-full h-12 px-4 text-sm font-semibold focus:outline-none"
+                              />
+                              <div className="flex divide-x divide-gray-100">
+                                <input 
+                                  type="text" 
+                                  placeholder="MM / YY" 
+                                  value={cardExpiry}
+                                  onChange={(e) => setCardExpiry(e.target.value)}
+                                  required 
+                                  className="w-1/2 h-12 px-4 text-sm font-semibold focus:outline-none"
+                                />
+                                <input 
+                                  type="text" 
+                                  placeholder="CVC" 
+                                  value={cardCVC}
+                                  onChange={(e) => setCardCVC(e.target.value)}
+                                  required 
+                                  className="w-1/2 h-12 px-4 text-sm font-semibold focus:outline-none"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Cardholder Name</label>
+                            <input 
+                              type="text" 
+                              placeholder="John Doe" 
+                              value={cardName}
+                              onChange={(e) => setCardName(e.target.value)}
+                              required 
+                              className="w-full h-12 px-4 rounded-xl border border-gray-200 font-semibold text-sm focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+
+                        <Button 
+                          type="submit" 
+                          className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-md shadow-lg shadow-blue-600/20"
+                        >
+                          💸 Simulate Secure Stripe Payment
+                        </Button>
+
+                        <p className="text-[10px] text-center text-gray-400 font-medium leading-relaxed">
+                          🔒 SSL Secured 256-Bit Encryption. By continuing, you authorize a secure sandbox transaction. No real funds will be debited.
+                        </p>
+                      </>
+                    )}
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Pulse WhatsApp Sales Widget */}
       <div className="fixed bottom-8 right-8 z-50">

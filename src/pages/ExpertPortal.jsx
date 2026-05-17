@@ -28,6 +28,7 @@ import { Button } from "../components/ui/button";
 import SessionCard from "../components/SessionCard";
 import { supabase } from "../lib/supabase";
 import { curriculumData } from "../lib/curriculum";
+import { evaluateHomeworkWithAI } from "../lib/aiEvaluationService";
 
 export default function ExpertPortal() {
   const navigate = useNavigate();
@@ -43,6 +44,42 @@ export default function ExpertPortal() {
 
   const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" or "roadmap"
   const [expandedWeek, setExpandedWeek] = useState(5); // Default to week 5 (Current class)
+  const [targetLanguage, setTargetLanguage] = useState("English");
+  const activeCurriculum = getLocalizedCurriculum(targetLanguage);
+  
+  // AI Grading States
+  const [submissionTexts, setSubmissionTexts] = useState({});
+  const [gradingResults, setGradingResults] = useState({});
+  const [isGradingMap, setIsGradingMap] = useState({});
+
+  const handleGradeSubmission = async (weekId, weekTitle) => {
+    const text = submissionTexts[weekId] || "";
+    if (!text.trim()) {
+      alert("Please paste or type the student's submission text to evaluate!");
+      return;
+    }
+
+    setIsGradingMap(prev => ({ ...prev, [weekId]: true }));
+    try {
+      const res = await evaluateHomeworkWithAI(text, weekTitle, weekId);
+      setGradingResults(prev => ({ ...prev, [weekId]: res }));
+    } catch (err) {
+      console.error(err);
+      alert("AI Evaluation failed to execute: " + err.message);
+    } finally {
+      setIsGradingMap(prev => ({ ...prev, [weekId]: false }));
+    }
+  };
+
+  const handleFillSampleText = (weekId, type) => {
+    let sample = "";
+    if (type === "good") {
+      sample = "Throughout my corporate career, navigating professional boundaries during presentations has always been a key focus. To make my presentations masterfully logical, I structure a strong hook at the start, followed by data-driven evidence supporting my core arguments. Consequently, this keeps stakeholders highly engaged and mitigates confusion. In my next session, I plan to outline direct executive communication lines clearly.";
+    } else {
+      sample = "i want to learn presentation. it was good. i did slides. thank you.";
+    }
+    setSubmissionTexts(prev => ({ ...prev, [weekId]: sample }));
+  };
   
   // Custom links saved in localStorage to represent real-time updates to meeting options
   const [tutorLinks, setTutorLinks] = useState(() => {
@@ -291,13 +328,28 @@ export default function ExpertPortal() {
             ) : (
               <div className="space-y-6">
                 <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8">
-                  <CardHeader className="p-0 mb-8">
-                    <CardTitle className="text-2xl font-bold">24-Week Tutor Action Syllabus</CardTitle>
-                    <CardDescription className="text-gray-400">View complete structural guidelines, icebreaker prompts, vocabulary cards, and configure student meeting links.</CardDescription>
+                  <CardHeader className="p-0 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                      <CardTitle className="text-2xl font-bold">24-Week Tutor Action Syllabus</CardTitle>
+                      <CardDescription className="text-gray-400">View complete structural guidelines, icebreaker prompts, vocabulary cards, and configure student meeting links.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">Active Track:</span>
+                      <select 
+                        value={targetLanguage} 
+                        onChange={(e) => setTargetLanguage(e.target.value)}
+                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-black"
+                      >
+                        <option value="English">🇬🇧 English Track</option>
+                        <option value="Spanish">🇪🇸 Spanish Track</option>
+                        <option value="French">🇫🇷 French Track</option>
+                        <option value="Japanese">🇯🇵 Japanese Track</option>
+                      </select>
+                    </div>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="space-y-4">
-                      {curriculumData.map((week) => {
+                      {activeCurriculum.map((week) => {
                         const isCurrent = week.id === 5;
                         const isExpanded = expandedWeek === week.id;
                         const currentLinks = tutorLinks[week.id] || {};
@@ -376,6 +428,125 @@ export default function ExpertPortal() {
                                 <div className="bg-gray-50/60 p-4 rounded-xl">
                                   <h5 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Grading & Evaluation Guide</h5>
                                   <p className="text-sm text-gray-700 font-semibold">{week.tutorGuide.evaluation}</p>
+                                </div>
+
+                                {/* AI Homework Grading Assistant */}
+                                <div className="border-t border-gray-100 pt-6 space-y-4">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                      <Award size={18} />
+                                    </div>
+                                    <div>
+                                      <h5 className="text-sm font-bold text-gray-900">🤖 AI Homework Grading Assistant</h5>
+                                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">CEFR-aligned Automated Assessment Engine</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                                    {/* Input Console */}
+                                    <div className="md:col-span-2 space-y-3">
+                                      <div className="flex justify-between items-center">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student Homework Submission</label>
+                                        <div className="flex gap-2">
+                                          <button 
+                                            onClick={() => handleFillSampleText(week.id, "good")}
+                                            className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md font-bold hover:bg-emerald-100 transition-colors"
+                                          >
+                                            ⚡ Inject Good Sample
+                                          </button>
+                                          <button 
+                                            onClick={() => handleFillSampleText(week.id, "bad")}
+                                            className="text-[10px] bg-rose-50 text-rose-700 px-2 py-1 rounded-md font-bold hover:bg-rose-100 transition-colors"
+                                          >
+                                            ⚡ Inject Weak Sample
+                                          </button>
+                                        </div>
+                                      </div>
+                                      <textarea 
+                                        rows={4}
+                                        placeholder="Paste student submission text here or click 'Inject Sample' to try it instantly..."
+                                        value={submissionTexts[week.id] || ""}
+                                        onChange={(e) => setSubmissionTexts(prev => ({ ...prev, [week.id]: e.target.value }))}
+                                        className="w-full text-sm bg-gray-50 border border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-indigo-500 font-medium text-gray-700 resize-none"
+                                      />
+                                      <Button 
+                                        onClick={() => handleGradeSubmission(week.id, week.title)}
+                                        disabled={isGradingMap[week.id]}
+                                        className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-600/10"
+                                      >
+                                        {isGradingMap[week.id] ? (
+                                          <>
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin animate-spin" />
+                                            Analyzing Grammar & Vocab...
+                                          </>
+                                        ) : (
+                                          <>
+                                            🤖 Auto-Grade with AI
+                                          </>
+                                        )}
+                                      </Button>
+                                    </div>
+
+                                    {/* Output Console */}
+                                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 min-h-[16rem] flex flex-col justify-between">
+                                      {gradingResults[week.id] ? (
+                                        <div className="space-y-4">
+                                          <div className="flex justify-between items-start">
+                                            <div>
+                                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CEFR Rank</p>
+                                              <span className="inline-block mt-1 text-xs font-extrabold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-md">
+                                                {gradingResults[week.id].vocabularyBadge}
+                                              </span>
+                                            </div>
+                                            <div className="text-right">
+                                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Overall Score</p>
+                                              <p className="text-3xl font-black text-emerald-600">{gradingResults[week.id].score}%</p>
+                                            </div>
+                                          </div>
+
+                                          <div className="space-y-2">
+                                            <div className="flex justify-between text-xs font-bold text-gray-500">
+                                              <span>Grammar Precision</span>
+                                              <span>{gradingResults[week.id].feedback.rubricScores.grammar}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                                              <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${gradingResults[week.id].feedback.rubricScores.grammar}%` }} />
+                                            </div>
+                                            <div className="flex justify-between text-xs font-bold text-gray-500 mt-1">
+                                              <span>Vocabulary Range</span>
+                                              <span>{gradingResults[week.id].feedback.rubricScores.vocabulary}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                                              <div className="bg-blue-500 h-full rounded-full" style={{ width: `${gradingResults[week.id].feedback.rubricScores.vocabulary}%` }} />
+                                            </div>
+                                          </div>
+
+                                          <div className="pt-2 border-t border-gray-200/60">
+                                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600 mb-1">Key Strength</p>
+                                            <p className="text-[11px] font-semibold text-gray-600 leading-tight">
+                                              ✅ {gradingResults[week.id].feedback.strengths[0]}
+                                            </p>
+                                          </div>
+                                          <div className="pt-2 border-t border-gray-200/60">
+                                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-orange-500 mb-1">Top Recommendation</p>
+                                            <p className="text-[11px] font-semibold text-gray-600 leading-tight">
+                                              ⚠️ {gradingResults[week.id].feedback.suggestions[0]}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+                                          <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-400 mb-3 animate-pulse">
+                                            🤖
+                                          </div>
+                                          <p className="text-xs font-bold text-gray-700">Awaiting submission...</p>
+                                          <p className="text-[10px] text-gray-400 mt-1 max-w-[12rem] mx-auto leading-relaxed">
+                                            Paste homework or inject a sample on the left to activate AI grading.
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
 
                                 {/* Live Class Link Configurator */}

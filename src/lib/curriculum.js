@@ -611,3 +611,103 @@ export const curriculumData = [
     }
   }
 ];
+
+export function getLocalizedCurriculum(targetLang = "english") {
+  const lang = targetLang.toLowerCase();
+  
+  if (lang === "english") return curriculumData;
+
+  const translations = {
+    spanish: {
+      modules: {
+        "Module 1: Foundation & Confidence": "Módulo 1: Fundamentos y Confianza",
+        "Module 2: Business & Workplace English": "Módulo 2: Español Profesional y de Negocios",
+        "Module 3: Presentation & Public Speaking": "Módulo 3: Presentación y Oratoria en Público",
+        "Module 4: Advanced Debate & Analysis": "Módulo 4: Debate y Análisis Avanzado",
+        "Module 5: Job Interviews & Exams": "Módulo 5: Entrevistas de Trabajo y Evaluaciones",
+        "Module 6: Global Capstone": "Módulo 6: Proyecto Final Global"
+      },
+      weeks: {
+        1: { title: "Introducción y Evaluación Conversacional", deliverable: "Envía una grabación de audio de 60 segundos sobre tu experiencia laboral." },
+        2: { title: "El Arte de la Conversación Casual", deliverable: "Escribe 5 preguntas abiertas para un evento de networking profesional." },
+        3: { title: "Expresar Opiniones y Debatir en Reuniones", deliverable: "Graba un debate de 90 segundos sobre el trabajo remoto vs. híbrido." },
+        4: { title: "Navegación de Escenarios Reales", deliverable: "Realiza una simulación de reserva telefónica con el tutor." },
+        5: { title: "Presentaciones Profesionales y Elevator Pitch", deliverable: "Redacta el guion de tu Elevator Pitch de 60 segundos." },
+        6: { title: "Comunicación y Gestión de Reuniones", deliverable: "Escribe una agenda simulada para una reunión de estatus." },
+        7: { title: "Etiqueta de Correo Electrónico", deliverable: "Redacta un correo electrónico formal de seguimiento para un cliente clave." },
+        8: { title: "Negociación e Influencia", deliverable: "Graba una simulación de negociación de 2 minutos." },
+        9: { title: "Estructura de Presentaciones", deliverable: "Crea un bosquejo y guion para el inicio de una presentación." },
+        10: { title: "Visualización de Datos y Métricas", deliverable: "Graba una explicación de 2 minutos sobre un reporte de negocios." },
+        11: { title: "Manejo de Preguntas Bajo Presión", deliverable: "Escribe 3 frases puente para responder preguntas difíciles." },
+        12: { title: "Confianza Vocal y Ritmo", deliverable: "Graba un discurso aplicando las reglas de pausas rítmicas." },
+        24: { title: "Presentación de Proyecto Final y Graduación", deliverable: "Entrega tu presentación en vivo y recibe tus credenciales de graduado." }
+      }
+    },
+    french: {
+      modules: {
+        "Module 1: Foundation & Confidence": "Module 1: Fondements et Confiance",
+        "Module 2: Business & Workplace English": "Module 2: Français Professionnel et des Affaires",
+        "Module 3: Presentation & Public Speaking": "Module 3: Présentation et Art Oratoire",
+        "Module 4: Advanced Debate & Analysis": "Module 4: Débat et Analyse Avancée",
+        "Module 5: Job Interviews & Exams": "Module 5: Entretiens d'Embauche et Examens",
+        "Module 6: Global Capstone": "Module 6: Projet de Synthèse Global"
+      },
+      weeks: {
+        1: { title: "Introduction et Évaluation Conversationnelle", deliverable: "Soumettez un enregistrement audio de 60 secondes décrivant votre parcours." },
+        2: { title: "L'Art des Discussions Informelles", deliverable: "Rédigez 5 questions ouvertes adaptées aux événements de réseautage." },
+        3: { title: "Exprimer des Opinions et Débattre", deliverable: "Enregistrez un débat de 90 secondes sur le travail à distance vs hybride." },
+        4: { title: "Navigation dans les Scénarios Réels", deliverable: "Effectuez une simulation de réservation téléphonique avec le tuteur." },
+        5: { title: "Présentations Professionnelles et Elevator Pitch", deliverable: "Rédigez le script de votre pitch de présentation de 60 secondes." },
+        6: { title: "Communication Efficace en Réunion", deliverable: "Rédigez un ordre du jour fictif pour une réunion d'avancement." },
+        7: { title: "Mails et Communication Asynchrone", deliverable: "Rédigez un email formel de relance pour un client important." },
+        8: { title: "Négociation et Persuasion", deliverable: "Enregistrez un scénario de négociation de 2 minutes." },
+        9: { title: "Structurer des Présentations Impactantes", deliverable: "Créez une structure et une accroche pour une intervention." },
+        10: { title: "Visualiser les Données et Métriques", deliverable: "Enregistrez une vidéo explicative de 2 minutes sur un graphique." },
+        11: { title: "Gérer les Questions Difficiles", deliverable: "Rédigez 3 phrases de transition pour gagner du temps." },
+        12: { title: "Confiance Vocale et Intonation", deliverable: "Enregistrez un discours en appliquant les règles de pauses." },
+        24: { title: "Présentation Finale et Remise des Diplômes", deliverable: "Présentez votre projet final en direct et recevez votre diplôme." }
+      }
+    },
+    japanese: {
+      modules: {
+        "Module 1: Foundation & Confidence": "モジュール 1: 基礎と自信構築",
+        "Module 2: Business & Workplace English": "モジュール 2: ビジネスと職場での日本語",
+        "Module 3: Presentation & Public Speaking": "モジュール 3: プレゼンテーションとスピーチ",
+        "Module 4: Advanced Debate & Analysis": "モジュール 4: 高度なディベートと分析",
+        "Module 5: Job Interviews & Exams": "モジュール 5: 面接対策と試験準備",
+        "Module 6: Global Capstone": "モジュール 6: グローバル・カプストーン"
+      },
+      weeks: {
+        1: { title: "イントロダクションと会話レベル評価", deliverable: "あなたのキャリアに関する60秒の自己紹介音声を提出してください。" },
+        2: { title: "雑談と日常会話の技術", deliverable: "ネットワーキングイベント向けの5つの質問を用意してください。" },
+        3: { title: "意見の表明と建設的なディスカッション", deliverable: "リモートワークに関する90秒の意見表明音声を録音してください。" },
+        4: { title: "日常生活におけるシナリオ対話", deliverable: "電話での予約シミュレーションを実践してください。" },
+        5: { title: "自己PRとエレベーター・ピッチ", deliverable: "60秒のエレベーターピッチの原稿を作成してください。" },
+        6: { title: "効率的な会議運営と発言方法", deliverable: "会議のアジェンダと議事録のサンプルを作成してください。" },
+        7: { title: "メールと非同期コミュニケーションの作法", deliverable: "重要クライアントへのフォローアップ用ビジネスメールを作成してください。" },
+        8: { title: "交渉力と説得術", deliverable: "2分間の交渉ロールプレイを録音してください。" },
+        9: { title: "インパクトのあるプレゼン構成", deliverable: "プレゼンのアジェンダ構成案と導入部分の原稿を準備してください。" },
+        10: { title: "データ分析とメトリクス解説", deliverable: "グラフや業績報告の2分間の解説動画を録画してください。" },
+        11: { title: "プレッシャー下の質疑応答対策", deliverable: "難しい質問に対応するための3つのクッション言葉を用意してください。" },
+        12: { title: "声の自信・流暢さと抑揚", deliverable: "効果的なポーズを取り入れた2分間のスピーチを録音してください。" },
+        24: { title: "卒業制作発表と修了式", deliverable: "最終発表を実施し、コース修了証書を受け取ってください。" }
+      }
+    }
+  };
+
+  const targetTrans = translations[lang] || translations.spanish;
+
+  return curriculumData.map(week => {
+    const weekTrans = targetTrans.weeks[week.id];
+    const moduleTrans = targetTrans.modules[week.module];
+    
+    return {
+      ...week,
+      title: weekTrans ? weekTrans.title : `${targetLang.toUpperCase()} Track - ${week.title}`,
+      module: moduleTrans || week.module,
+      deliverable: weekTrans ? weekTrans.deliverable : `[${targetLang.toUpperCase()} Translation Active] ${week.deliverable}`,
+      objectives: week.objectives.map((obj) => `[${targetLang.toUpperCase()}] ${obj}`),
+      tutorGuide: week.tutorGuide // Keep guide parameters consistent
+    };
+  });
+}
