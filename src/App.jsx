@@ -141,6 +141,8 @@ function LandingPage() {
             </CardContent>
           </Card>
         </motion.div>
+      </motion.section>
+
       {/* Pricing & Programs Section */}
       <motion.section 
         initial={{ opacity: 0 }}
