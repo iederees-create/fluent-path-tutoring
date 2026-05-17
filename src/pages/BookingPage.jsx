@@ -139,23 +139,42 @@ export default function BookingPage() {
             </div>
           </div>
           
-          {/* Right Side: Time Slots */}
-          <div className="md:w-2/3 p-8 flex flex-col items-center justify-center text-center">
-            <div className="w-full max-w-sm">
-              <Calendar size={48} className="mx-auto text-blue-100 mb-6" />
-              <h3 className="text-2xl font-bold mb-2">Select a Time</h3>
-              <p className="text-gray-500 mb-8 text-sm">
-                Choose an available slot to confirm your booking and sync calendar data.
-              </p>
-              
-              <div className="grid grid-cols-3 gap-3 mb-8">
-                {['09:00', '10:00', '11:00', '13:00', '14:00', '16:00'].map(time => (
-                  <button key={time} onClick={() => handleBookSession(tutor, time)} className="py-3 border border-gray-200 rounded-xl font-bold text-sm hover:border-blue-500 hover:text-blue-600 transition-colors">
-                    {time}
-                  </button>
-                ))}
+          {/* Right Side: WhatsApp Guided Scheduling */}
+          <div className="md:w-2/3 p-10 flex flex-col items-center justify-center text-center bg-white">
+            <div className="w-full max-w-md space-y-6">
+              <div className="w-16 h-16 bg-[#25D366]/10 rounded-full flex items-center justify-center text-[#25D366] mx-auto animate-pulse">
+                <MessageCircle size={36} className="fill-current" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Timezone: Africa/Johannesburg (GMT+2)</p>
+              <div>
+                <h3 className="text-2xl font-extrabold text-gray-900 mb-2">Live WhatsApp Placement</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  To match you with **{tutor.name}** and configure your tailored pricing (including custom direct invoice links), our admissions director handles bookings directly via WhatsApp.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-4 text-xs font-semibold text-gray-600 space-y-2 border border-gray-100 text-left">
+                <p className="flex items-center gap-2">🟢 Immediate response time (8:00 AM - 8:00 PM GMT+2)</p>
+                <p className="flex items-center gap-2">🔒 Secure payments via Stripe Credit Card / Yoco EFT</p>
+                <p className="flex items-center gap-2">📅 Instantly syncs to your Google or Zoom Calendar</p>
+              </div>
+
+              <a 
+                href={`https://wa.me/27725550212?text=Hi%20FluentPath!%20I'd%20like%20to%20book%20a%20private%20session%20with%20tutor%20${encodeURIComponent(tutor.name)}%20for%20their%20${encodeURIComponent(tutor.specialties?.[0] || "General Conversational")}%20program.%20Let's%20find%20a%20time!`}
+                target="_blank"
+                rel="noreferrer"
+                className="block"
+              >
+                <Button className="w-full h-14 bg-[#25D366] hover:bg-[#20ba56] text-white rounded-2xl font-bold flex items-center justify-center gap-2 text-md shadow-lg shadow-[#25D366]/20">
+                  <MessageCircle size={18} className="fill-current text-white" />
+                  Secure Session via WhatsApp
+                </Button>
+              </a>
+              <button 
+                onClick={onClose}
+                className="text-xs font-bold text-gray-400 hover:text-black uppercase tracking-wider transition-colors"
+              >
+                Go Back to Tutors
+              </button>
             </div>
           </div>
         </motion.div>

@@ -141,7 +141,162 @@ function LandingPage() {
             </CardContent>
           </Card>
         </motion.div>
+      {/* Pricing & Programs Section */}
+      <motion.section 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="max-w-6xl mx-auto mb-32"
+      >
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-display font-extrabold mb-4 tracking-tight">Choose Your Learning Tier</h2>
+          <p className="text-gray-500 max-w-xl mx-auto leading-relaxed">
+            All programs follow our credential-grade 24-week syllabus. Secure placement and direct Stripe invoicing are managed instantly via WhatsApp.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 items-stretch">
+          {/* Tier 1 */}
+          <Card className="border-none bg-white p-8 flex flex-col justify-between rounded-3xl shadow-sm hover:shadow-lg transition-all relative overflow-hidden group">
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Conversational Focus</span>
+                  <h3 className="text-2xl font-bold mt-1 text-gray-900">Launchpad Tier</h3>
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-extrabold text-gray-900">$45</span>
+                <span className="text-gray-400 font-bold text-sm">/ session</span>
+              </div>
+              <ul className="space-y-4 text-sm font-medium text-gray-600 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Pay-as-you-go flexibility
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> WebRTC native video classroom
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Direct access to syllabus
+                </li>
+              </ul>
+            </div>
+            <a 
+              href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20would%20like%20to%20start%20with%20the%20Launchpad%20Program%20($45/session).%20Let's%20discuss%20my%20goals!" 
+              target="_blank" 
+              rel="noreferrer"
+              className="w-full mt-auto"
+            >
+              <Button className="w-full rounded-2xl h-14 bg-black hover:bg-gray-800 text-white font-bold group">
+                Select Launchpad
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+              </Button>
+            </a>
+          </Card>
+
+          {/* Tier 2 */}
+          <Card className="border-2 border-blue-600 bg-white p-8 flex flex-col justify-between rounded-3xl shadow-md hover:shadow-xl transition-all relative overflow-hidden group">
+            <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-bl-xl">
+              Most Popular
+            </div>
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Complete Syllabus</span>
+                  <h3 className="text-2xl font-bold mt-1 text-gray-900">Professional Tier</h3>
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-extrabold text-gray-900">$160</span>
+                <span className="text-gray-400 font-bold text-sm">/ month</span>
+              </div>
+              <ul className="space-y-4 text-sm font-medium text-gray-600 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> **1 session / week** (4 per month)
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Full credential-grade roadmap
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Weekly homework assessment
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Dedicated professional coach
+                </li>
+              </ul>
+            </div>
+            <a 
+              href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20would%20like%20to%20enroll%20in%20the%2024-Week%20Professional%20Program%20($160/month).%20Let's%20discuss%20my%20goals!" 
+              target="_blank" 
+              rel="noreferrer"
+              className="w-full mt-auto"
+            >
+              <Button className="w-full rounded-2xl h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold group">
+                Select Professional
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+              </Button>
+            </a>
+          </Card>
+
+          {/* Tier 3 */}
+          <Card className="border-none bg-white p-8 flex flex-col justify-between rounded-3xl shadow-sm hover:shadow-lg transition-all relative overflow-hidden group">
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Intensive Milestones</span>
+                  <h3 className="text-2xl font-bold mt-1 text-gray-900">Accelerator Tier</h3>
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-extrabold text-gray-900">$290</span>
+                <span className="text-gray-400 font-bold text-sm">/ month</span>
+              </div>
+              <ul className="space-y-4 text-sm font-medium text-gray-600 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> **2 sessions / week** (8 per month)
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Fast-tracked IELTS/TOEFL goals
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> VIP priority booking slots
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> Unlimited chat/vocab support
+                </li>
+              </ul>
+            </div>
+            <a 
+              href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20would%20like%20to%20enroll%20in%20the%2024-Week%20Accelerator%20Program%20($290/month).%20Let's%20discuss%20my%20goals!" 
+              target="_blank" 
+              rel="noreferrer"
+              className="w-full mt-auto"
+            >
+              <Button className="w-full rounded-2xl h-14 bg-black hover:bg-gray-800 text-white font-bold group">
+                Select Accelerator
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={16} />
+              </Button>
+            </a>
+          </Card>
+        </div>
       </motion.section>
+
+      {/* Floating Pulse WhatsApp Sales Widget */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <a 
+          href="https://wa.me/27725550212?text=Hi%20FluentPath!%20I%20have%20a%20few%20questions%20about%20your%20English%20tutoring%20curriculum%20and%20payouts.%20Could%20we%20chat?"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center w-16 h-16 rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-all duration-300 group relative"
+        >
+          <span className="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-35 animate-ping" />
+          <MessageCircle size={28} className="fill-current" />
+          
+          <div className="absolute right-20 bg-white border border-gray-100 text-gray-800 text-xs font-bold py-2.5 px-4 rounded-2xl shadow-xl w-48 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300 text-center">
+            💬 Chat Live with an Advisor
+          </div>
+        </a>
+      </div>
     </main>
   );
 }
