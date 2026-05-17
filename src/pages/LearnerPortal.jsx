@@ -35,6 +35,37 @@ export default function LearnerPortal() {
   const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "roadmap", or "aura-advisor"
   const [expandedWeek, setExpandedWeek] = useState(5); // Default expand Week 5 (Current Week)
 
+  // Onboarding Intake States (for inactive campus accounts)
+  const [onboardingStep, setOnboardingStep] = useState(1); // 1: Pick Language Track, 2: Interactive Intake Q&A, 3: AI Diagnostic Report & EFT Activation
+  const [selectedOnboardingLang, setSelectedOnboardingLang] = useState("English");
+  const [onboardingInputText, setOnboardingInputText] = useState("");
+  const [isOnboardingAnalyzing, setIsOnboardingAnalyzing] = useState(false);
+  const [onboardingScorecard, setOnboardingScorecard] = useState(null);
+
+  const handleStartOnboardingText = (lang) => {
+    setSelectedOnboardingLang(lang);
+    setOnboardingStep(2);
+  };
+
+  const handleRunOnboardingAnalysis = async (e) => {
+    e.preventDefault();
+    if (!onboardingInputText.trim()) return;
+
+    setIsOnboardingAnalyzing(true);
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Immersion analysis loading delay
+
+    setOnboardingScorecard({
+      lang: selectedOnboardingLang,
+      level: "B2 - Upper Intermediate",
+      grammar: "84%",
+      fluency: "79%",
+      recommendedPlan: "Professional Plan ($160/mo)",
+      whatsAppLink: `https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20completed%20the%20Aura%20AI%20onboarding%20diagnostic%20in%20my%20member%20area.%20I%20was%20placed%20at%20B2%20on%20the%20${encodeURIComponent(selectedOnboardingLang)}%20track.%20I%20would%20like%20to%20manually%20activate%20my%20Professional%20Plan%20($160%2Fmo)%20using%20the%20email%20${encodeURIComponent(profile?.email || "")}!`
+    });
+    setOnboardingStep(3);
+    setIsOnboardingAnalyzing(false);
+  };
+
   // Student Success Advisor Chatbot States
   const [advisorMessages, setAdvisorMessages] = useState([
     {
@@ -189,86 +220,226 @@ export default function LearnerPortal() {
   if (!isPremiumActive) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-12">
-          <div>
+        <div className="max-w-4xl mx-auto space-y-12 animate-fadeIn">
+          
+          {/* Header */}
+          <div className="text-center">
             <span className="text-xs font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full uppercase tracking-widest">
-              Campus Access Inactive
+              Campus Onboarding & Placement
             </span>
-            <h1 className="text-4xl font-display font-extrabold tracking-tight mt-6 animate-pulse">
-              Activate Your Interactive 24-Week Campus
+            <h1 className="text-4xl font-display font-extrabold tracking-tight mt-6">
+              Welcome to FluentPath, {profile?.email?.split('@')[0]}!
             </h1>
             <p className="text-gray-500 mt-3 max-w-xl mx-auto leading-relaxed text-sm font-medium">
-              Welcome to your student profile! To configure your custom language track, book 1-on-1 tutoring sessions, and unlock your roadmap, select a program tier below. 
-              Manual payment (EFT) activation is managed instantly via chat.
+              Let's complete your intake placement diagnostic with Aura, our strategic student success AI, to determine your target level and perfect learning track.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            {/* Launchpad Card */}
-            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-              <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Conversational</span>
-                <h3 className="text-lg font-bold text-gray-900 mt-1">Launchpad Plan</h3>
-                <p className="text-2xl font-black text-blue-600 mt-2">$45<span className="text-xs font-bold text-gray-400">/ session</span></p>
-                <p className="text-xs text-gray-500 mt-4 leading-relaxed font-semibold">Perfect for flexible conversation practices with native speakers on-demand.</p>
+          {/* Aura Interactive Placement Console */}
+          <Card className="border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden max-w-2xl mx-auto">
+            <div className="bg-gray-900 text-white p-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white text-lg">
+                  🤖
+                </div>
+                <div>
+                  <h3 className="font-bold text-md leading-tight">Aura AI Placement Advisor</h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">FluentPath Automated CEFR Intake</p>
+                </div>
               </div>
-              <a 
-                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%20Launchpad%20Plan%20($45%2Fsession)%20for%20my%20registered%20account%20${encodeURIComponent(profile?.email || "")}.%20Please%20send%20me%20EFT%20instructions!`}
-                target="_blank"
-                rel="noreferrer"
-                className="block mt-6"
-              >
-                <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold h-11">
-                  Activate Launchpad
-                </Button>
-              </a>
-            </div>
-
-            {/* Professional Card */}
-            <div className="bg-white rounded-[2rem] p-6 border-2 border-blue-600 shadow-sm flex flex-col justify-between hover:shadow-md transition-all relative">
-              <span className="absolute -top-3 right-6 bg-blue-600 text-white text-[8px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full">
-                Most Popular
+              <span className="text-xs bg-blue-500/20 text-blue-400 font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">
+                Active Session
               </span>
-              <div>
-                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Full Core Syllabus</span>
-                <h3 className="text-lg font-bold text-gray-900 mt-1">Professional Plan</h3>
-                <p className="text-2xl font-black text-blue-600 mt-2">$160<span className="text-xs font-bold text-gray-400">/ month</span></p>
-                <p className="text-xs text-gray-500 mt-4 leading-relaxed font-semibold">Weekly lessons, complete 24-week credentials path, and direct AI homework feedback.</p>
-              </div>
-              <a 
-                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%20Professional%20Plan%20($160%2Fmo)%20for%20my%20registered%20account%20${encodeURIComponent(profile?.email || "")}.%20Please%20send%20me%20EFT%20instructions!`}
-                target="_blank"
-                rel="noreferrer"
-                className="block mt-6"
-              >
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold h-11">
-                  Activate Professional
-                </Button>
-              </a>
             </div>
 
-            {/* Accelerator Card */}
-            <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-              <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Intensive Program</span>
-                <h3 className="text-lg font-bold text-gray-900 mt-1">Accelerator Plan</h3>
-                <p className="text-2xl font-black text-blue-600 mt-2">$290<span className="text-xs font-bold text-gray-400">/ month</span></p>
-                <p className="text-xs text-gray-500 mt-4 leading-relaxed font-semibold">Double weekly lessons, fast-track career milestones, and priority calendar support.</p>
-              </div>
-              <a 
-                href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20want%20to%20manually%20activate%20my%20Accelerator%20Plan%20($290%2Fmo)%20for%20my%20registered%20account%20${encodeURIComponent(profile?.email || "")}.%20Please%20send%20me%20EFT%20instructions!`}
-                target="_blank"
-                rel="noreferrer"
-                className="block mt-6"
-              >
-                <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold h-11">
-                  Activate Accelerator
-                </Button>
-              </a>
-            </div>
-          </div>
+            <CardContent className="p-8 space-y-6">
+              {/* Step 1: Language Track Selection */}
+              {onboardingStep === 1 && (
+                <div className="space-y-6 text-center py-6">
+                  <div className="bg-blue-50/50 text-blue-800 text-xs font-semibold p-5 rounded-2xl border border-blue-50 leading-relaxed text-left max-w-lg mx-auto">
+                    "Hello! I'm Aura, your AI Placement Advisor. 🌟 To place you at the perfect starting milestone on our 24-week curriculum roadmap, please pick your desired target language track first."
+                  </div>
 
-          <div className="text-xs text-gray-400 font-medium">
+                  <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    {[
+                      { lang: "English", label: "🇬🇧 English Track" },
+                      { lang: "Spanish", label: "🇪🇸 Spanish Track" },
+                      { lang: "French", label: "🇫🇷 French Track" },
+                      { lang: "Japanese", label: "🇯🇵 Japanese Track" }
+                    ].map((t) => (
+                      <Button
+                        key={t.lang}
+                        onClick={() => handleStartOnboardingText(t.lang)}
+                        className="h-14 bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-850 font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2"
+                      >
+                        {t.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Intake Text Entry */}
+              {onboardingStep === 2 && (
+                <div className="space-y-6">
+                  <div className="bg-blue-50/50 text-blue-800 text-xs font-semibold p-5 rounded-2xl border border-blue-50 leading-relaxed">
+                    "Excellent choice! You selected the <strong>{selectedOnboardingLang} Track</strong>. To calibrate your interactive roadmap, please describe your main objectives (e.g. business presentations, career prospects) and any previous language experience you have."
+                  </div>
+
+                  {isOnboardingAnalyzing ? (
+                    <div className="text-center py-8 space-y-4">
+                      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest animate-pulse">
+                        Aura is analyzing grammar, vocab metrics & CEFR parameters...
+                      </p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleRunOnboardingAnalysis} className="space-y-4">
+                      <textarea
+                        rows={4}
+                        required
+                        value={onboardingInputText}
+                        onChange={(e) => setOnboardingInputText(e.target.value)}
+                        placeholder="Type or paste your response here (e.g. 'I need English for executive sales calls. I can speak a bit but need structure...')"
+                        className="w-full text-xs font-semibold text-gray-750 bg-gray-50 border border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-black resize-none"
+                      />
+                      <div className="flex gap-3">
+                        <Button 
+                          type="button" 
+                          onClick={() => setOnboardingStep(1)} 
+                          variant="outline" 
+                          className="flex-1 rounded-xl h-12 font-bold text-xs"
+                        >
+                          ← Change Track
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          className="flex-1 rounded-xl h-12 font-bold text-xs bg-black text-white hover:bg-gray-800"
+                        >
+                          Submit to Aura AI →
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {/* Step 3: Diagnostic Report & Activation Grids */}
+              {onboardingStep === 3 && onboardingScorecard && (
+                <div className="space-y-8 animate-fadeIn">
+                  <div className="bg-emerald-50/50 border border-emerald-100 text-emerald-800 p-5 rounded-2xl text-xs font-semibold leading-relaxed">
+                    🎉 Onboarding Diagnostic complete! Aura has analyzed your goals and compiled your custom strategic intake scorecard below.
+                  </div>
+
+                  {/* Aura Scorecard Dashboard */}
+                  <div className="border border-gray-100 rounded-3xl p-6 bg-gray-50/50 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Recommended Track</p>
+                      <h4 className="text-lg font-extrabold text-gray-900 mt-1">{onboardingScorecard.lang} Curriculum</h4>
+                      
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-4">CEFR Level Recommendation</p>
+                      <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-xs font-extrabold mt-1">
+                        {onboardingScorecard.level}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                          <span>Grammar Precision</span>
+                          <span>{onboardingScorecard.grammar}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full" style={{ width: onboardingScorecard.grammar }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                          <span>Vocabulary Range</span>
+                          <span>{onboardingScorecard.fluency}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full" style={{ width: onboardingScorecard.fluency }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pricing grid below diagnostic scorecard */}
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h4 className="text-lg font-bold text-gray-900">Select Program to Activate Online Campus</h4>
+                      <p className="text-xs text-gray-400 font-semibold mt-1">Choose a program tier below. Clicking activates WhatsApp with your scorecard details!</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-4 text-left">
+                      {/* Launchpad Card */}
+                      <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                        <div>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Conversational</span>
+                          <h3 className="text-sm font-bold text-gray-900 mt-1">Launchpad</h3>
+                          <p className="text-lg font-black text-blue-600 mt-1">$45<span className="text-[10px] font-bold text-gray-400">/ session</span></p>
+                        </div>
+                        <a 
+                          href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20completed%20the%20Aura%20AI%20onboarding%20diagnostic%20in%20my%20member%20area.%20I%20was%20placed%20at%20B2%20on%20the%20${encodeURIComponent(selectedOnboardingLang)}%20track.%20I%2520would%2520like%2520to%2520activate%2520my%2520Launchpad%2520Plan%2520(%252445%2520%252F%2520session)%2520manually!%20My%20email%20is%20${encodeURIComponent(profile?.email || "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block mt-4"
+                        >
+                          <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl text-[10px] font-bold h-9">
+                            Activate Launchpad
+                          </Button>
+                        </a>
+                      </div>
+
+                      {/* Professional Card */}
+                      <div className="bg-white rounded-2xl p-5 border-2 border-blue-600 shadow-sm flex flex-col justify-between hover:shadow-md transition-all relative">
+                        <span className="absolute -top-2.5 right-4 bg-blue-600 text-white text-[7px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                          Rec. Plan
+                        </span>
+                        <div>
+                          <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Full Core Syllabus</span>
+                          <h3 className="text-sm font-bold text-gray-900 mt-1">Professional</h3>
+                          <p className="text-lg font-black text-blue-600 mt-1">$160<span className="text-[10px] font-bold text-gray-400">/ month</span></p>
+                        </div>
+                        <a 
+                          href={onboardingScorecard.whatsAppLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block mt-4"
+                        >
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-bold h-9">
+                            Activate Professional
+                          </Button>
+                        </a>
+                      </div>
+
+                      {/* Accelerator Card */}
+                      <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                        <div>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Intensive Program</span>
+                          <h3 className="text-sm font-bold text-gray-900 mt-1">Accelerator</h3>
+                          <p className="text-lg font-black text-blue-600 mt-1">$290<span className="text-[10px] font-bold text-gray-400">/ month</span></p>
+                        </div>
+                        <a 
+                          href={`https://wa.me/27610922970?text=Hi%20FluentPath!%20I%20completed%20the%20Aura%20AI%20onboarding%20diagnostic%20in%20my%20member%20area.%20I%20was%20placed%20at%20B2%20on%20the%20${encodeURIComponent(selectedOnboardingLang)}%20track.%20I%20would%20like%20to%20activate%20my%20Accelerator%20Plan%20($290%20%2F%20month)%20manually!%20My%20email%20is%20${encodeURIComponent(profile?.email || "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block mt-4"
+                        >
+                          <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl text-[10px] font-bold h-9">
+                            Activate Accelerator
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="text-xs text-gray-400 font-medium text-center">
             🔒 direct EFT activation • Live admissions advisor call/chat +27 61 092 2970
           </div>
         </div>
